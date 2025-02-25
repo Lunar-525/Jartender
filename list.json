@@ -1,0 +1,82 @@
+[
+    {
+        "server_name": "1.21.4-DeerFolia",
+        "jar_name": "DeerFolia-1.21.4-0561727.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-DeerFolia\\DeerFolia-1.21.4-0561727.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "DeerFolia",
+        "loader_version": "DEV-HEAD@0561727"
+    },
+    {
+        "server_name": "1.21.4-Fabric",
+        "jar_name": "fabric-server-mc.1.21.4-loader.0.16.10-launcher.1.0.1.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-Fabric\\fabric-server-mc.1.21.4-loader.0.16.10-launcher.1.0.1.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Fabric",
+        "loader_version": "0.16.10"
+    },
+    {
+        "server_name": "1.21.4-Forge",
+        "jar_name": "forge-1.21.4-54.1.0-shim.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-Forge\\forge-1.21.4-54.1.0-shim.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Forge",
+        "loader_version": "54.1.0"
+    },
+    {
+        "server_name": "1.21.4-leaf",
+        "jar_name": "leaf-1.21.4.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-leaf\\leaf-1.21.4.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Leaf",
+        "loader_version": "DEV-ver/1.21.4@be4bee9"
+    },
+    {
+        "server_name": "1.21.4-leaves",
+        "jar_name": "leaves-1.21.4.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-leaves\\leaves-1.21.4.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Leaves",
+        "loader_version": "7-master@07b429e"
+    },
+    {
+        "server_name": "1.21.4-lightingluminol",
+        "jar_name": "lightingluminol-1.21.3-bundler.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-lightingluminol\\lightingluminol-1.21.3-bundler.jar",
+        "minecraft_version": "1.21.3",
+        "server_type": "LightingLuminol",
+        "loader_version": "DEV-dev/1.21.3@7b9fd3d"
+    },
+    {
+        "server_name": "1.21.4-luminol",
+        "jar_name": "luminol-1.21.4-bundler.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-luminol\\luminol-1.21.4-bundler.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Luminol",
+        "loader_version": "DEV-ver/1.21.4@f3e8f02"
+    },
+    {
+        "server_name": "1.21.4-mohist",
+        "jar_name": "mohist-1.20.1-923-server.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-mohist\\mohist-1.20.1-923-server.jar",
+        "minecraft_version": null,
+        "server_type": "Unknown",
+        "loader_version": null
+    },
+    {
+        "server_name": "1.21.4-paper",
+        "jar_name": "paper-1.21.4-178.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-paper\\paper-1.21.4-178.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Paper",
+        "loader_version": "178-main@636ae0c"
+    },
+    {
+        "server_name": "1.21.4-purpur",
+        "jar_name": "purpur-1.21.4-2399.jar",
+        "jar_path": "C:\\Users\\tempusr\\Documents\\Jartender\\Servers\\1.21.4-purpur\\purpur-1.21.4-2399.jar",
+        "minecraft_version": "1.21.4",
+        "server_type": "Purpur",
+        "loader_version": "2399-HEAD@62cbd47"
+    }
+]

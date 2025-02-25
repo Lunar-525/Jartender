@@ -18,7 +18,7 @@ class ServerManifest:
             raise FileNotFoundError(f"JAR文件不存在: {jar_path}")
 
         target_dir = os.path.dirname(jar_path)
-        command = ["java", "-jar", os.path.basename(jar_path)]
+        command = ["java", "-jar", os.path.basename(jar_path),"-nogui"]
 
         try:
             self.process = subprocess.Popen(
@@ -81,10 +81,12 @@ class ServerManifest:
             return self._analyze_forge(log_data)
 
         # 通过日志内容检测类型
-        if 'Fabric Loader' in log_data:
+        if 'net.fabricmc.loader' in log_data:
             return self._analyze_fabric(log_data)
         elif 'MinecraftForge' in log_data:
             return self._analyze_forge(log_data)
+        elif 'org.bukkit.craftbukkit.Main' in log_data:
+            return self._analyze_bukkits(log_data)
 
         return {
             "minecraft_version": None,
@@ -121,6 +123,85 @@ class ServerManifest:
             "server_type": "Forge",
             "loader_version": forge_version
         }
+    @staticmethod
+    def _analyze_bukkits(log_str: str) -> Dict[str, Optional[str]]:
+        """
+        分析 Bukkit 系服务端日志，支持 Purpur/DeerFolia 等变种
+
+        支持的日志格式：
+        1. Purpur 格式：[bootstrap] Loading Purpur 1.21.4-2399-HEAD@62cbd47 (...) for Minecraft 1.21.4
+        2. DeerFolia 格式：[bootstrap] Loading DeerFolia 1.21.4-DEV-HEAD@0561727 1.21.4-178-main@636ae0c
+
+        返回结构：
+        {
+            "minecraft_version": "1.21.4",
+            "server_type": "Purpur",
+            "loader_version": "2399-HEAD@62cbd47"
+        }
+        """
+        # 定义多模式正则表达式（按优先级排序）
+        patterns = [
+            # 模式1：带明确 MC 版本声明的格式（Purpur）
+            re.compile(
+                r"Loading\s+"
+                r"(?P<server_type>Purpur|DeerFolia)\s+"
+                r"(?P<full_version>\d+\.\d+\.\d+-(?P<build>[^\s]+))"
+                r".*for Minecraft (?P<mc_version>\d+\.\d+\.\d+)",
+                re.IGNORECASE
+            ),
+            # 模式2：复合版本格式（DeerFolia 备用匹配）
+            re.compile(
+                r"Loading\s+"
+                r"(?P<server_type>DeerFolia)\s+"
+                r"(?P<full_version>\d+\.\d+\.\d+-[^\s]+)\s+"
+                r"(?P<alt_version>\d+\.\d+\.\d+-[^\s]+)",
+                re.IGNORECASE
+            ),
+            # 模式3：通用版本格式
+            re.compile(
+                r"Loading\s+"
+                r"(?P<server_type>\w+)\s+"
+                r"(?P<full_version>\d+\.\d+\.\d+-[^\s]+)",
+                re.IGNORECASE
+            )
+        ]
+
+        for line in log_str.split('\n'):
+            for pattern in patterns:
+                match = pattern.search(line)
+                if match:
+                    server_type = match.group("server_type")
+                    result = {
+                        "minecraft_version": None,
+                        "server_type": server_type,
+                        "loader_version": None
+                    }
+
+                    # 处理不同匹配模式
+                    if pattern == patterns[0]:  # Purpur 格式
+                        result["minecraft_version"] = match.group("mc_version")
+                        result["loader_version"] = match.group("build")
+                    elif pattern == patterns[1]:  # DeerFolia 双版本格式
+                        # 取第一个版本号中的 MC 版本
+                        mc_ver = match.group("full_version").split('-')[0]
+                        result["minecraft_version"] = mc_ver
+                        # 组合两个版本号为 loader_version
+                        result["loader_version"] = f"{match.group('full_version')}+{match.group('alt_version')}"
+                    else:  # 通用格式
+                        full_ver = match.group("full_version")
+                        ver_parts = full_ver.split('-', 1)
+                        result["minecraft_version"] = ver_parts[0]
+                        result["loader_version"] = ver_parts[1] if len(ver_parts) > 1 else None
+
+                    return result
+
+        # 未匹配到任何模式
+        return {
+            "minecraft_version": None,
+            "server_type": "Bukkit",
+            "loader_version": None
+        }
+
 
 
 def manifest(jar_path: str, timeout: int = 15) -> Dict[str, Optional[str]]:
@@ -141,9 +222,11 @@ def manifest(jar_path: str, timeout: int = 15) -> Dict[str, Optional[str]]:
             "loader_version": str(e)
         }
 
+def ping():
+    print("pong!")
 
 # 模块自测试
 if __name__ == "__main__":
-    test_jar = r"C:\Users\tempusr\Documents\Jartender\Servers\1.21.4-Forge\forge-1.21.4-54.1.0-shim.jar"
+    test_jar = r"C:\Users\tempusr\Documents\Jartender\Servers\1.21.4-leaf\leaf-1.21.4.jar"
     result = manifest(test_jar)
-    print("测试结果:", result)
+    print("Test result:", result)

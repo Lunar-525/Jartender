@@ -1,7 +1,84 @@
+import os
+import sys
+import json
+from pathlib import Path
+
+class BColors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+if __name__ == "__main__":
+    # add
+    current_dir = Path(__file__).parent
+    modules_dir = current_dir / "modules"
+    sys.path.insert(0, str(modules_dir))
+
+    from modules import manifester,eulafucker,serverlistinitializer
+
+    current_directory = os.getcwd()
+    config_path = os.path.join(current_directory, 'config.json')
+
+    current_server = "未选择"
+
+    if not os.path.isfile(config_path):
+        print(BColors.FAIL + "config.json 与 list.json 文件不存在。将进行初始化。")
+        try:
+            f = open("config.json", "x")
+            fh = open("list.json", "x")
+
+        except:
+            print("Error: 没有找到文件或读取文件失败")
+
+        else:
+            if not os.path.exists("./Servers"):
+                print("将使用Servers作为默认服务器目录。您可以在设置中更改默认服务器目录。")
+                os.mkdir("./Servers")
+            # 获取当前工作目录的绝对路径
+            current_dir = os.getcwd()
+
+            # 初始化配置
+            config = {
+                "serverpath": os.path.join(current_dir, "Servers")  # 指定服务器绝对路径
+            }
+
+            # 写入 config.json
+            with open("config.json", "w", encoding="utf-8") as f:
+                json.dump(config, f, indent=4)  # 使用缩进格式化 JSON
+
+            print(f"config.json 已初始化，serverpath 设置为 {config['serverpath']},应用将会关闭来完成初始化，请您手动重新启动。")
+
+            exit()
+
+
+    print(BColors.OKGREEN + r"===========================================================================")
+    print(BColors.WARNING + r"     ██╗ █████╗ ██████╗ ████████╗███████╗███╗   ██╗██████╗ ███████╗██████╗ ")
+    print(BColors.WARNING + r"     ██║██╔══██╗██╔══██╗╚══██╔══╝██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗")
+    print(BColors.WARNING + r"     ██║███████║██████╔╝   ██║   █████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝")
+    print(BColors.WARNING + r"██   ██║██╔══██║██╔══██╗   ██║   ██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗")
+    print(BColors.WARNING + r"╚█████╔╝██║  ██║██║  ██║   ██║   ███████╗██║ ╚████║██████╔╝███████╗██║  ██║")
+    print(BColors.WARNING + r" ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝")
+
+    if os.path.getsize("list.json") == 0:
+        print(BColors.OKGREEN + r"===========================================================================")
+        print(BColors.WARNING + "⚠️服务器列表为空。您需要初始化服务器列表。")
+        ifinitserver = input("初始化服务器列表？(Y/n)")
+        if ifinitserver == "Y":
+            serverlistinitializer.initialize()
+        elif ifinitserver == "n":
+            print("您跳过了服务器列表初始化。您可以稍后手动进行初始化。")
+        else:
+            print("你想干嘛？")
+
 def main_menu():
     while True:
-        #if
-        print("\n=== Jartender - A Simple Minecraft Server Manager ===")
+        print(BColors.OKGREEN + "============== Jartender - A Simple Minecraft Server Manager ==============")
         print("1. 启动服务器")
         print("2. 管理服务器")
         print("3. Jartender 设置")
@@ -25,6 +102,7 @@ def main_menu():
 def start_server_menu():
     """启动服务器的子菜单"""
     print("\n=== 启动服务器 ===")
+    print(BColors.WARNING + "当前服务器:" + current_server + BColors.OKGREEN)
     print("1. 选择服务器核心")
     print("2. 直接启动服务器")
     print("3. 以 GUI 启动服务器")
@@ -52,6 +130,7 @@ def manage_server_menu():
     print("3. Plugins 管理")
     print("4. Worlds 管理")
     print("5. 服务器设置")
+    print("6. 扫描并更新服务器列表")
     print("0. 返回主菜单")
 
     choice = input("请选择操作: ").strip()
@@ -66,6 +145,9 @@ def manage_server_menu():
         print("进入 Worlds 管理...")
     elif choice == "5":
         print("进入服务器设置...")
+    elif choice == "6":
+        print("开始扫描...")
+        serverlistinitializer.initialize()
     elif choice == "0":
         return
     else:

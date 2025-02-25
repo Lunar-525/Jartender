@@ -4,7 +4,7 @@ import os
 def accept_eula(server_dir):
 
     eula_path = os.path.join(server_dir, "eula.txt")
-    print((r"输入“TRUE”即代表您接受并同意Mojang AB 和微软的 Minecraft 最终用户许可协议(https://aka.ms/MinecraftEULA)."))
+    print(r"输入“TRUE”即代表您接受并同意Mojang AB 和微软的 Minecraft 最终用户许可协议(https://aka.ms/MinecraftEULA).")
     eula_input = input(r"By typing 'TRUE' you are indicating your agreement to Mojang AB and Microsoft's EULA (https://aka.ms/MinecraftEULA).")
 
     if eula_input == "TRUE":
