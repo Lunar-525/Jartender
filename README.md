@@ -1,4 +1,7 @@
 # Jartender
+
+[English](https://github.com/tucaoba2333/Jartender/blob/main/README_EN.md)
+
 Jartender 是一款CLI工具，可以用来管理Minecraft服务器核心。
 
 ## ⚠<font color=pink>此工具仍处于早期开发，不能使用!</font>⚠
