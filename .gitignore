@@ -1,3 +1,6 @@
 Servers/
 modules/__pycache__/
+__pycache__/
 test.py
+config.json
+list.json

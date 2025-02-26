@@ -7,7 +7,7 @@ Jartender is a simple CLI tool to manage Minecraft Server Cores.
 |:---------------------------------------------:|:------------:|:---------------:|
 |     Retrieve existing server information      |      ?       |       ✅        |
 |                  Modify EULA                  |      ?       |       ✅        |
-|                 Start server                  |      ❌      |       ✅        |
+|                 Start server                  |      ✅      |       ✅        |
 |             Basic menu structure              |      ✅      |       ✅        |
 |                 Manage server                 |      ❌      |       ❌        |
 |      Download and auto-configure server       |      ❌      |       ❌        |
