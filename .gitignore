@@ -4,3 +4,5 @@ __pycache__/
 test.py
 config.json
 list.json
+.idea/
+.fabric/

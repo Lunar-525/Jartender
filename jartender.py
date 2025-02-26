@@ -7,7 +7,8 @@ class BColors:
     HEADER = '\033[95m'
     OKBLUE = '\033[94m'
     OKCYAN = '\033[96m'
-    OKGREEN = '\033[92m'
+    OKGREEN = '\033[38;2;120;200;120m'
+    LOGOYELLOW = '\033[38;2;200;180;100m'
     WARNING = '\033[93m'
     FAIL = '\033[91m'
     ENDC = '\033[0m'
@@ -40,30 +41,45 @@ if __name__ == "__main__":
             if not os.path.exists("./Servers"):
                 print("将使用Servers作为默认服务器目录。您可以在设置中更改默认服务器目录。")
                 os.mkdir("./Servers")
-            # 获取当前工作目录的绝对路径
             current_dir = os.getcwd()
 
-            # 初始化配置
             config = {
                 "serverpath": os.path.join(current_dir, "Servers")  # 指定服务器绝对路径
             }
-
-            # 写入 config.json
             with open("config.json", "w", encoding="utf-8") as f:
-                json.dump(config, f, indent=4)  # 使用缩进格式化 JSON
+                json.dump(config, f, indent=4)
 
             print(f"config.json 已初始化，serverpath 设置为 {config['serverpath']},应用将会关闭来完成初始化，请您手动重新启动。")
 
             exit()
 
 
-    print(BColors.OKGREEN + r"===========================================================================")
-    print(BColors.WARNING + r"     ██╗ █████╗ ██████╗ ████████╗███████╗███╗   ██╗██████╗ ███████╗██████╗ ")
-    print(BColors.WARNING + r"     ██║██╔══██╗██╔══██╗╚══██╔══╝██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗")
-    print(BColors.WARNING + r"     ██║███████║██████╔╝   ██║   █████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝")
-    print(BColors.WARNING + r"██   ██║██╔══██║██╔══██╗   ██║   ██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗")
-    print(BColors.WARNING + r"╚█████╔╝██║  ██║██║  ██║   ██║   ███████╗██║ ╚████║██████╔╝███████╗██║  ██║")
-    print(BColors.WARNING + r" ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝")
+    def gradient_yellow_rgb(text, offset):
+        start_color = (180, 140, 50)
+        end_color = (255, 220, 100)
+        length = len(text)
+        colored_text = ""
+
+        offset = offset * 2
+
+        for i, char in enumerate(text):
+            factor = (i + offset) / (length + offset)
+            r = int(start_color[0] + (end_color[0] - start_color[0]) * factor)
+            g = int(start_color[1] + (end_color[1] - start_color[1]) * factor)
+            b = int(start_color[2] + (end_color[2] - start_color[2]) * factor)
+
+            colored_text += f"\033[38;2;{r};{g};{b}m{char}"
+
+        return colored_text + "\033[0m" 
+
+
+    print(BColors.OKGREEN    +r"===========================================================================")
+    print(gradient_yellow_rgb(r"     ██╗ █████╗ ██████╗ ████████╗███████╗███╗   ██╗██████╗ ███████╗██████╗ ",0))
+    print(gradient_yellow_rgb(r"     ██║██╔══██╗██╔══██╗╚══██╔══╝██╔════╝████╗  ██║██╔══██╗██╔════╝██╔══██╗",1))
+    print(gradient_yellow_rgb(r"     ██║███████║██████╔╝   ██║   █████╗  ██╔██╗ ██║██║  ██║█████╗  ██████╔╝",2))
+    print(gradient_yellow_rgb(r"██   ██║██╔══██║██╔══██╗   ██║   ██╔══╝  ██║╚██╗██║██║  ██║██╔══╝  ██╔══██╗",3))
+    print(gradient_yellow_rgb(r"╚█████╔╝██║  ██║██║  ██║   ██║   ███████╗██║ ╚████║██████╔╝███████╗██║  ██║",4))
+    print(gradient_yellow_rgb(r" ╚════╝ ╚═╝  ╚═╝╚═╝  ╚═╝   ╚═╝   ╚══════╝╚═╝  ╚═══╝╚═════╝ ╚══════╝╚═╝  ╚═╝",5))
 
     if os.path.getsize("list.json") == 0:
         print(BColors.OKGREEN + r"===========================================================================")
@@ -94,7 +110,7 @@ def main_menu(current_server):
         elif choice == "3":
             settings_menu()
         elif choice == "0":
-            print("退出 Jartender...")
+            print("退出 Jartender..." + BColors.ENDC)
             break
         else:
             print("无效输入，请输入 0-3 之间的数字。")
@@ -187,3 +203,4 @@ def settings_menu():
 
 if __name__ == "__main__":
     main_menu(current_server)
+    print(BColors.ENDC)
