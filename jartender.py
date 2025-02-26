@@ -21,7 +21,7 @@ if __name__ == "__main__":
     modules_dir = current_dir / "modules"
     sys.path.insert(0, str(modules_dir))
 
-    from modules import Manifester, Contractor, Serverlistinitializer, Lister, ServerLauncher
+    from modules import Manifester, Contractor, Serverlistinitializer, Lister, ServerLauncher, AboutJartender
 
     current_directory = os.getcwd()
     config_path = os.path.join(current_directory, 'config.json')
@@ -55,8 +55,8 @@ if __name__ == "__main__":
 
 
     def gradient_yellow_rgb(text, offset):
-        start_color = (180, 140, 50)
-        end_color = (255, 220, 100)
+        start_color = (112, 214, 255)
+        end_color = (255, 112, 166)
         length = len(text)
         colored_text = ""
 
@@ -70,7 +70,7 @@ if __name__ == "__main__":
 
             colored_text += f"\033[38;2;{r};{g};{b}m{char}"
 
-        return colored_text + "\033[0m" 
+        return colored_text + "\033[0m"
 
 
     print(BColors.OKGREEN    +r"===========================================================================")
@@ -194,7 +194,8 @@ def settings_menu():
     elif choice == "2":
         print("进入网络设置...")
     elif choice == "3":
-        print("关于Jartender...")
+        AboutJartender.about()
+
     elif choice == "0":
         return
     else:
