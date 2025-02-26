@@ -20,12 +20,12 @@ if __name__ == "__main__":
     modules_dir = current_dir / "modules"
     sys.path.insert(0, str(modules_dir))
 
-    from modules import manifester,eulafucker,serverlistinitializer
+    from modules import Manifester, Contractor, Serverlistinitializer, Lister, ServerLauncher
 
     current_directory = os.getcwd()
     config_path = os.path.join(current_directory, 'config.json')
 
-    current_server = "未选择"
+    current_server = "None"
 
     if not os.path.isfile(config_path):
         print(BColors.FAIL + "config.json 与 list.json 文件不存在。将进行初始化。")
@@ -70,13 +70,13 @@ if __name__ == "__main__":
         print(BColors.WARNING + "⚠️服务器列表为空。您需要初始化服务器列表。")
         ifinitserver = input("初始化服务器列表？(Y/n)")
         if ifinitserver == "Y":
-            serverlistinitializer.initialize()
+            Serverlistinitializer.initialize()
         elif ifinitserver == "n":
             print("您跳过了服务器列表初始化。您可以稍后手动进行初始化。")
         else:
             print("你想干嘛？")
 
-def main_menu():
+def main_menu(current_server):
     while True:
         print(BColors.OKGREEN + "============== Jartender - A Simple Minecraft Server Manager ==============")
         print("1. 启动服务器")
@@ -87,9 +87,10 @@ def main_menu():
         choice = input("请选择操作 (输入对应数字): ").strip()
 
         if choice == "1":
-            start_server_menu()
+            new_current_server = start_server_menu(current_server)
+            current_server = new_current_server
         elif choice == "2":
-            manage_server_menu()
+            manage_server_menu(current_server)
         elif choice == "3":
             settings_menu()
         elif choice == "0":
@@ -99,7 +100,7 @@ def main_menu():
             print("无效输入，请输入 0-3 之间的数字。")
 
 
-def start_server_menu():
+def start_server_menu(current_server):
     """启动服务器的子菜单"""
     print("\n=== 启动服务器 ===")
     print(BColors.WARNING + "当前服务器:" + current_server + BColors.OKGREEN)
@@ -111,20 +112,25 @@ def start_server_menu():
     choice = input("请选择操作: ").strip()
 
     if choice == "1":
-        print("（这里可以添加服务器核心选择逻辑）")
+        server_list = Lister.load_server_list()
+        current_server = Lister.display_servers(server_list)
+        return current_server
     elif choice == "2":
         print("正在启动服务器...")
+        ServerLauncher.launch(current_server,current_dir,False)
     elif choice == "3":
         print("正在以 GUI 模式启动服务器...")
+        ServerLauncher.launch(current_server, current_dir, True)
     elif choice == "0":
         return
     else:
         print("无效输入，请重新选择。")
 
 
-def manage_server_menu():
+def manage_server_menu(current_server):
     """管理服务器的子菜单"""
     print("\n=== 管理服务器 ===")
+    print(BColors.WARNING + "当前服务器:" + current_server + BColors.OKGREEN)
     print("1. 版本管理")
     print("2. Mods 管理")
     print("3. Plugins 管理")
@@ -146,8 +152,11 @@ def manage_server_menu():
     elif choice == "5":
         print("进入服务器设置...")
     elif choice == "6":
-        print("开始扫描...")
-        serverlistinitializer.initialize()
+        if "y" == input("确认扫描(y)"):
+            print("开始扫描...")
+            Serverlistinitializer.initialize()
+        else:
+            print("用户取消了扫描。")
     elif choice == "0":
         return
     else:
@@ -177,4 +186,4 @@ def settings_menu():
 
 
 if __name__ == "__main__":
-    main_menu()
+    main_menu(current_server)

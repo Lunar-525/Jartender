@@ -1,4 +1,4 @@
-# manifester.py
+# Manifester.py
 import subprocess
 import time
 import os
@@ -6,6 +6,12 @@ import re
 from threading import Thread
 from typing import Dict, Optional
 
+"""
+由于各个核心标准也是群魔乱舞，此处实现方法更加抽象。
+1.scanner传递每个核心的路径
+2.for所有路径，逐个创建子进程，运行15秒，通过管道捕获日志，解析日志文本来获得版本信息。
+3.return log_data.解析,传递serverlistinitializer.py
+"""
 
 class ServerManifest:
     def __init__(self):
@@ -87,6 +93,8 @@ class ServerManifest:
             return self._analyze_forge(log_data)
         elif 'org.bukkit.craftbukkit.Main' in log_data:
             return self._analyze_bukkits(log_data)
+        elif 'Mohist' or ' ███╗   ███╗ ' in log_data:
+            return self._analyze_mohist(log_data)
 
         return {
             "minecraft_version": None,
@@ -126,11 +134,12 @@ class ServerManifest:
     @staticmethod
     def _analyze_bukkits(log_str: str) -> Dict[str, Optional[str]]:
         """
-        分析 Bukkit 系服务端日志，支持 Purpur/DeerFolia 等变种
+        分析 Bukkit 系服务端日志，支持 Purpur/Paper/Spogit 等变种
 
         支持的日志格式：
         1. Purpur 格式：[bootstrap] Loading Purpur 1.21.4-2399-HEAD@62cbd47 (...) for Minecraft 1.21.4
         2. DeerFolia 格式：[bootstrap] Loading DeerFolia 1.21.4-DEV-HEAD@0561727 1.21.4-178-main@636ae0c
+        3. ...
 
         返回结构：
         {
@@ -199,6 +208,40 @@ class ServerManifest:
         return {
             "minecraft_version": None,
             "server_type": "Bukkit",
+            "loader_version": None
+        }
+
+    @staticmethod
+    def _analyze_mohist(log_str: str) -> Dict[str, Optional[str]]:
+        """
+        解析 Mohist 服务器日志版本信息
+        支持的日志格式示例：
+        "Thanks for using Mohist - 1.20.1-923, Java(65.0) 21.0.5 PID: 46224"
+
+        返回结构：
+        {
+            "minecraft_version": "1.20.1",
+            "server_type": "Mohist",
+            "loader_version": "923"
+        }
+        """
+        # 定义匹配 Mohist 版本的正则表达式模式
+        pattern = r"Mohist - (\d+\.\d+\.\d+)-(\d+)"
+
+        # 逐行扫描日志
+        for line in log_str.split('\n'):
+            match = re.search(pattern, line)
+            if match:
+                return {
+                    "minecraft_version": match.group(1),
+                    "server_type": "Mohist",  # 固定值
+                    "loader_version": match.group(2)
+                }
+
+        # 未找到匹配内容时返回默认值
+        return {
+            "minecraft_version": None,
+            "server_type": "Mohist",
             "loader_version": None
         }
 

@@ -7,9 +7,15 @@ def scan_core(path: str) -> dict:
     print(f"hi, doing at {path}")
     """
     扫描指定路径下的服务器文件夹，识别并选择核心 JAR 文件
-
+    实际上实现方法非常抽象。
     :param path: 服务器根目录路径
     :return: 包含服务器名称和对应核心 JAR 文件的字典
+    """
+    """
+    1.listdir>current_server
+    2.移除current_server列表内所有不endwith .jar的项目
+    3.移除包含install的项目
+    4.若只剩一个项目，就完成核心的识别。否则用户手动选择。
     """
     if not os.path.exists(path):
         raise FileNotFoundError(f"路径不存在: {path}")
