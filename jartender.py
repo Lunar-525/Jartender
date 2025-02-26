@@ -15,43 +15,48 @@ class BColors:
     BOLD = '\033[1m'
     UNDERLINE = '\033[4m'
 
+from modules import Manifester, Contractor, Serverlistinitializer, Lister, ServerLauncher, AboutJartender
+    #                读取服务器     EULA            初始化列表          列出       服务器启动         关于
+
 if __name__ == "__main__":
-    # add
+    # 基本变量初始化
     current_dir = Path(__file__).parent
     modules_dir = current_dir / "modules"
     sys.path.insert(0, str(modules_dir))
 
-    from modules import Manifester, Contractor, Serverlistinitializer, Lister, ServerLauncher, AboutJartender
-
     current_directory = os.getcwd()
     config_path = os.path.join(current_directory, 'config.json')
-
     current_server = "None"
 
-    if not os.path.isfile(config_path):
-        print(BColors.FAIL + "config.json 与 list.json 文件不存在。将进行初始化。")
-        try:
-            f = open("config.json", "x")
-            fh = open("list.json", "x")
+    def initialize():
+        if not os.path.isfile(config_path):
+            print(BColors.FAIL + "config.json 与 list.json 文件不存在。将进行初始化。")
+            try:
+                f = open("config.json", "x")
+                fh = open("list.json", "x")
 
-        except:
-            print("Error: 没有找到文件或读取文件失败")
+            except:
+                print("Error: 没有找到文件或读取文件失败")
 
-        else:
-            if not os.path.exists("./Servers"):
-                print("将使用Servers作为默认服务器目录。您可以在设置中更改默认服务器目录。")
-                os.mkdir("./Servers")
-            current_dir = os.getcwd()
+            else:
+                if not os.path.exists("./Servers"):
+                    print("将使用Servers作为默认服务器目录。您可以在设置中更改默认服务器目录。")
+                    os.mkdir("./Servers")
+                current_dir = os.getcwd()
 
-            config = {
-                "serverpath": os.path.join(current_dir, "Servers")  # 指定服务器绝对路径
-            }
-            with open("config.json", "w", encoding="utf-8") as f:
-                json.dump(config, f, indent=4)
+                config = {
+                    "serverpath": os.path.join(current_dir, "Servers")  # 指定服务器绝对路径
+                }
+                with open("config.json", "w", encoding="utf-8") as f:
+                    json.dump(config, f, indent=4)
 
-            print(f"config.json 已初始化，serverpath 设置为 {config['serverpath']},应用将会关闭来完成初始化，请您手动重新启动。")
+                print(f"config.json 已初始化，serverpath 设置为 {config['serverpath']},应用将会关闭来完成初始化，请您手动重新启动。")
 
-            exit()
+                exit()
+
+    initialize()
+    
+    from modules import Serverlistinitializer, ServerInstaller
 
 
     def gradient_yellow_rgb(text, offset):
@@ -148,8 +153,8 @@ def manage_server_menu(current_server):
     print("\n=== 管理服务器 ===")
     print(BColors.WARNING + "当前服务器:" + current_server + BColors.OKGREEN)
     print("1. 版本管理")
-    print("2. Mods 管理")
-    print("3. Plugins 管理")
+    print("2. 安装新的服务端")
+    print("3. Plugins/Mods 管理")
     print("4. Worlds 管理")
     print("5. 服务器设置")
     print("6. 扫描并更新服务器列表")
@@ -160,7 +165,10 @@ def manage_server_menu(current_server):
     if choice == "1":
         print("进入版本管理...")
     elif choice == "2":
-        print("进入 Mods 管理...")
+        print("安装新的服务端...")
+        current_dir = Serverlistinitializer.read_server_path()['serverpath']
+        print(f"当前服务器目录{current_dir}")
+        ServerInstaller.run(current_dir)
     elif choice == "3":
         print("进入 Plugins 管理...")
     elif choice == "4":
@@ -192,7 +200,7 @@ def settings_menu():
     if choice == "1":
         print("进入存放服务器路径设置...")
     elif choice == "2":
-        print("进入网络设置...")
+        print("进入全局设置...")
     elif choice == "3":
         AboutJartender.about()
 

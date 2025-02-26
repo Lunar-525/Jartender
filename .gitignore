@@ -6,3 +6,8 @@ config.json
 list.json
 .idea/
 .fabric/
+out/
+jartender.exe
+TestFolder/
+list.json.dis
+config.json.dis

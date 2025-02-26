@@ -1,11 +1,21 @@
 import json,os
 
-from jartender import BColors
+class BColors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[38;2;120;200;120m'
+    LOGOYELLOW = '\033[38;2;200;180;100m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
 
 from modules import Scanner,Manifester
 
 def read_server_path(config_path: str = "config.json") -> str:
-    with open('config.json', 'r') as config_file:
+    with open('./config.json', 'r') as config_file:
         config_data = json.load(config_file)
         return config_data
 """
@@ -19,7 +29,7 @@ def initialize():
     server_core_path = Scanner.scan_core(server_path)
     result_list = []
     eta = 15 * len(server_core_path)
-    print(BColors.WARNING + "\n这将花费一些时间，取决于您的服务端数量。过程可能弹出服务器gui。估计大约需要花费{eta}秒。" + BColors.OKGREEN)
+    print(BColors.WARNING + f"\n这将花费一些时间，取决于您的服务端数量。过程可能弹出服务器gui。估计大约需要花费{eta}秒。\n" + BColors.ENDC)
     for folder_name, jar_file in server_core_path.items():
         # 构建服务器核心路径
         jar_path = os.path.join(server_path, folder_name, jar_file)
@@ -38,8 +48,8 @@ def initialize():
             }
 
             result_list.append(server_info)
-            print(server_info)
-            print(f"✅ 成功处理: {folder_name}")
+            print(BColors.ENDC + f"{server_info}")
+            print(BColors.OKGREEN + "✅ 成功处理: {folder_name}")
 
         except Exception as e:
             print(BColors.FAIL + f"❌ 处理 {folder_name} 时发生错误: {str(e)}" + BColors.OKGREEN)

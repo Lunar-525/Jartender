@@ -79,14 +79,6 @@ class ServerManifest:
         """自动检测服务器类型并分析日志"""
         log_data = '\n'.join(self.output_lines)
 
-        # 优先通过JAR文件名检测类型
-        jar_name = self.process.args[2].lower() if self.process else ""
-        if 'fabric' in jar_name:
-            return self._analyze_fabric(log_data)
-        elif 'forge' in jar_name:
-            return self._analyze_forge(log_data)
-
-        # 通过日志内容检测类型
         if 'net.fabricmc.loader' in log_data:
             return self._analyze_fabric(log_data)
         elif 'MinecraftForge' in log_data:
@@ -117,7 +109,6 @@ class ServerManifest:
         mc_version = None
         forge_version = None
 
-        # 匹配两种可能的日志格式
         version_match = re.search(r"for MC (\d+\.\d+\.\d+)", log_str)
         forge_match = re.search(r"MinecraftForge v(\d+\.\d+\.\d+)", log_str)
 
@@ -148,9 +139,9 @@ class ServerManifest:
             "loader_version": "2399-HEAD@62cbd47"
         }
         """
-        # 定义多模式正则表达式（按优先级排序）
+
         patterns = [
-            # 模式1：带明确 MC 版本声明的格式（Purpur）
+
             re.compile(
                 r"Loading\s+"
                 r"(?P<server_type>Purpur|DeerFolia)\s+"
@@ -158,7 +149,7 @@ class ServerManifest:
                 r".*for Minecraft (?P<mc_version>\d+\.\d+\.\d+)",
                 re.IGNORECASE
             ),
-            # 模式2：复合版本格式（DeerFolia 备用匹配）
+
             re.compile(
                 r"Loading\s+"
                 r"(?P<server_type>DeerFolia)\s+"
@@ -166,7 +157,7 @@ class ServerManifest:
                 r"(?P<alt_version>\d+\.\d+\.\d+-[^\s]+)",
                 re.IGNORECASE
             ),
-            # 模式3：通用版本格式
+
             re.compile(
                 r"Loading\s+"
                 r"(?P<server_type>\w+)\s+"
@@ -186,17 +177,14 @@ class ServerManifest:
                         "loader_version": None
                     }
 
-                    # 处理不同匹配模式
                     if pattern == patterns[0]:  # Purpur 格式
                         result["minecraft_version"] = match.group("mc_version")
                         result["loader_version"] = match.group("build")
                     elif pattern == patterns[1]:  # DeerFolia 双版本格式
-                        # 取第一个版本号中的 MC 版本
                         mc_ver = match.group("full_version").split('-')[0]
                         result["minecraft_version"] = mc_ver
-                        # 组合两个版本号为 loader_version
                         result["loader_version"] = f"{match.group('full_version')}+{match.group('alt_version')}"
-                    else:  # 通用格式
+                    else:
                         full_ver = match.group("full_version")
                         ver_parts = full_ver.split('-', 1)
                         result["minecraft_version"] = ver_parts[0]
@@ -204,7 +192,6 @@ class ServerManifest:
 
                     return result
 
-        # 未匹配到任何模式
         return {
             "minecraft_version": None,
             "server_type": "Bukkit",
@@ -225,10 +212,10 @@ class ServerManifest:
             "loader_version": "923"
         }
         """
-        # 定义匹配 Mohist 版本的正则表达式模式
+        # Match Mohist version 的正则表达式模式
         pattern = r"Mohist - (\d+\.\d+\.\d+)-(\d+)"
 
-        # 逐行扫描日志
+        # scan log
         for line in log_str.split('\n'):
             match = re.search(pattern, line)
             if match:
@@ -238,7 +225,6 @@ class ServerManifest:
                     "loader_version": match.group(2)
                 }
 
-        # 未找到匹配内容时返回默认值
         return {
             "minecraft_version": None,
             "server_type": "Mohist",
