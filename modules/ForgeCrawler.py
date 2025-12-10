@@ -2,12 +2,14 @@ import os
 import math
 import shutil
 import requests
-
+import time
 # 全局变量存储选中的项目（与 FabricCrawler 一致）
 selected_item = None
 
 
 def forge_crawler(current_dir):
+    terminal_width, _ = shutil.get_terminal_size()
+
     """
     Forge 安装流程占位：
     1. 获取版本信息（TODO: 调用官方 API）
@@ -16,23 +18,29 @@ def forge_crawler(current_dir):
     4. 下载服务器 Jar
     5. 保存文件并返回路径
     """
-    
+
     # TODO: 拉取 Forge 版本信息
-    versions = {
-        "game": [],      # TODO: 填充 Minecraft 版本列表
-        "loader": [],    # TODO: 填充 Forge loader/installer 列表
-    }
+    response = requests.get("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json")
+    versions = response.json()
 
-    terminal_width, _ = shutil.get_terminal_size()
+    # 1. 选择 Minecraft 版本
+    game_versions = set()
+    for key in versions["promos"].keys():
+        mc_version = key.rsplit("-", 1)[0] 
+        game_versions.add(mc_version)
+    # 转换为列表并按版本号排序
+    game_versions = sorted(
+        game_versions,
+        key=lambda v: [int(x) for x in v.split(".")],
+        reverse=True  # 新版本在前
+    )
 
-    # 1. 选择 Minecraft 版本（占位）
-    if versions["game"]:
-        select_version("Minecraft", versions["game"], terminal_width)
-        current_minecraft_version = selected_item["version"]
-    else:
-        current_minecraft_version = None
-        print("TODO: 未实现 Forge Minecraft 版本获取")
+    print(game_versions)
+    #select_version("Minecraft", game_versions, terminal_width)
+    #current_minecraft_version = selected_item["version"]
+    time.sleep(100)
 
+    
     # 2. 选择 Forge 版本（占位）
     if versions["loader"]:
         select_version("Forge", versions["loader"], terminal_width)
@@ -59,20 +67,21 @@ def select_version(version_type, versions, terminal_width):
 
     # 根据版本类型调整显示
     if version_type == "Minecraft":
+        item_prefix = ""
         get_name = lambda v: v["version"]
     else:
-        # Forge 版本使用 version 字段；如有稳定标记，可在此添加
-        get_name = lambda v: v.get("version", str(v))
+        # 为稳定版添加emoji标记
+        get_name = lambda v: f"💡{v['version']}" if v.get("stable") else v["version"]
 
     # 计算适合的列数和每项的宽度
-    max_item_length = max([len(get_name(v)) + 5 for v in versions]) if versions else 10
+    max_item_length = max([len(get_name(v)) + 5 for v in versions], default=10)  # 加5是为了包含序号和间距
     cols = max(1, terminal_width // max_item_length)
     item_width = terminal_width // cols
 
     # 初始化分页
     page_size = 20  # 每页显示的项数
     current_page = 0
-    total_pages = math.ceil(len(versions) / page_size) if versions else 1
+    total_pages = max(1, math.ceil(len(versions) / page_size))
 
     while True:
         os.system('cls' if os.name == 'nt' else 'clear')  # 清屏
@@ -99,9 +108,6 @@ def select_version(version_type, versions, terminal_width):
                     item_text = f"{global_idx + 1}. {get_name(page_items[idx])}"
                     line += item_text.ljust(item_width)
             print(line)
-
-        if not page_items:
-            print("暂无可选版本（占位）。")
 
         # 显示导航选项
         nav_options = []
@@ -138,5 +144,5 @@ def select_version(version_type, versions, terminal_width):
 
 
 if __name__ == "__main__":
-    forge_crawler(os.getcwd())
-
+    current_dir = os.getcwd()
+    forge_crawler(r"/Users/Luna/Documents/GitHub/Jartender/Servers/test")
