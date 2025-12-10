@@ -1,4 +1,5 @@
 import json,os
+from modules import Settings
 
 class BColors:
     HEADER = '\033[95m'
@@ -15,9 +16,7 @@ class BColors:
 from modules import Scanner,Manifester
 
 def read_server_path(config_path: str = "config.json") -> str:
-    with open('./config.json', 'r') as config_file:
-        config_data = json.load(config_file)
-        return config_data
+    return Settings.load_config()
 """
 1.从config文件获取serverpath
 2.使用scanner.scan获取服务器核心列表。
@@ -25,7 +24,7 @@ def read_server_path(config_path: str = "config.json") -> str:
 4.构建字典传入json。
 """
 def initialize():
-    server_path = read_server_path()['serverpath']
+    server_path = Settings.server_root(read_server_path())
     server_core_path = Scanner.scan_core(server_path)
     result_list = []
     eta = 15 * len(server_core_path)
@@ -49,7 +48,7 @@ def initialize():
 
             result_list.append(server_info)
             print(BColors.ENDC + f"{server_info}")
-            print(BColors.OKGREEN + "✅ 成功处理: {folder_name}")
+            print(BColors.OKGREEN + f"✅ 成功处理: {folder_name}")
 
         except Exception as e:
             print(BColors.FAIL + f"❌ 处理 {folder_name} 时发生错误: {str(e)}" + BColors.OKGREEN)
@@ -57,9 +56,9 @@ def initialize():
 
     # 写入JSON文件
     try:
-        with open('./list.json', 'w', encoding='utf-8') as f:
+        with open(Settings.LIST_PATH, 'w', encoding='utf-8') as f:
             json.dump(result_list, f, indent=4, ensure_ascii=False)
-        print(BColors.OKGREEN + "✅数据已成功写入./list.json")
+        print(BColors.OKGREEN + f"✅数据已成功写入 {Settings.LIST_PATH}")
     except Exception as e:
         print(BColors.FAIL + f"❌写入文件失败: {str(e)}" + BColors.OKGREEN)
 

@@ -1,0 +1,4 @@
+"""
+Java module package.
+"""
+

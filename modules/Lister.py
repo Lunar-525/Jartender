@@ -1,18 +1,16 @@
-import os
 import json
 import shutil
 from tabulate import tabulate
-
-CONFIG_FILE = "./list.json"
+from modules import Settings
 
 def load_server_list():
     """加载 list.json 并解析 JSON"""
-    if not os.path.exists(CONFIG_FILE):
-        print(f"❌ 配置文件 {CONFIG_FILE} 不存在！")
+    if not Settings.LIST_PATH.exists():
+        print(f"❌ 配置文件 {Settings.LIST_PATH} 不存在！")
         return []
 
     try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+        with open(Settings.LIST_PATH, "r", encoding="utf-8") as file:
             return json.load(file)
     except json.JSONDecodeError as e:
         print(f"❌ 解析 JSON 出错: {e}")
