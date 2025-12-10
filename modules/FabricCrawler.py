@@ -1,3 +1,4 @@
+import time
 import requests
 import os
 import math
@@ -15,6 +16,8 @@ def fabric_crawler(current_dir):
 
     # 1. 选择Minecraft版本
     game_versions = [v for v in versions["game"] if v["stable"]]
+    print(game_versions)
+    time.sleep(10)
     select_version("Minecraft", game_versions, terminal_width)
     current_minecraft_version = selected_item["version"]
 
