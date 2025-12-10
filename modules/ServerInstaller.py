@@ -1,8 +1,7 @@
-import os,json
+import os
 import subprocess
 import sys
-import time
-from typing import Optional
+from pathlib import Path
 
 class BColors:
     HEADER = '\033[95m'
@@ -19,51 +18,41 @@ class BColors:
 from modules import FabricCrawler, Contractor
 
 
-def read_server_path(config_path: str = "config.json") -> str:
-    with open('config.json', 'r') as config_file:
-        config_data = json.load(config_file)
-        return config_data
-
-ServersPath = read_server_path()['serverpath']
-print(ServersPath)
-
-def run(current_dir):
+def run(server_root: Path):
     print("1. 🧶安装Fabric Server")
     print("2. 🔨安装Forge Server")
     print("更多选项仍在开发...")
     choice = input("请选择操作:")
     if choice == "1":
-        install_fabric(current_dir)
+        install_fabric(server_root)
     elif choice == "2":
-        install_forge(current_dir)
+        install_forge(server_root)
     elif choice == "3":
         print("敬请期待")
 
-def nametag(current_dir):
-    name = input("名称:")
-    new_dir = os.path.join(current_dir, name)
-    print(new_dir)
-    if os.path.exists(new_dir):
-        print(f"路径 '{new_dir}' 已经存在!")
-        nametag(current_dir)
-    else:
-        os.makedirs(new_dir)
+def nametag(server_root: Path):
+    while True:
+        name = input("名称:")
+        new_dir = server_root / name
+        print(new_dir)
+        if new_dir.exists():
+            print(f"路径 '{new_dir}' 已经存在! 请重新输入。")
+            continue
+        new_dir.mkdir(parents=True, exist_ok=False)
         print(f"创建{name}成功。")
-        return(new_dir,name)
+        return (new_dir, name)
 
 
 
-def install_fabric(current_dir: str) -> None:
+def install_fabric(server_root: Path) -> None:
     """
     安装并初始化Fabric服务器
 
     :param current_dir: 当前工作目录路径
     """
-    new_dir = nametag(current_dir)
-    name = new_dir[1]
-    server_jar = FabricCrawler.fabric_crawler(new_dir[0])[0]
+    new_dir, name = nametag(server_root)
+    server_jar = FabricCrawler.fabric_crawler(str(new_dir))[0]
     print(server_jar)
-    os.chdir(new_dir[0])
     print("开始进行Fabric服务器初始化...")
 
     # 阶段1: 首次运行以生成配置文件
@@ -75,7 +64,8 @@ def install_fabric(current_dir: str) -> None:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            universal_newlines=True
+            universal_newlines=True,
+            cwd=new_dir
         )
 
         # 实时监控输出流
@@ -113,7 +103,7 @@ def install_fabric(current_dir: str) -> None:
     # 阶段2: 同意EULA协议
     try:
         print("正在同意EULA协议...")
-        Contractor.accept_eula(new_dir[0])
+        Contractor.accept_eula(str(new_dir))
     except Exception as e:
         print(f"同意EULA时发生错误: {str(e)}")
         sys.exit(1)
@@ -127,7 +117,8 @@ def install_fabric(current_dir: str) -> None:
             stderr=subprocess.STDOUT,
             text=True,
             bufsize=1,
-            universal_newlines=True
+            universal_newlines=True,
+            cwd=new_dir
         )
 
         # 实时监控日志输出
@@ -179,8 +170,8 @@ def _terminate_process(process: subprocess.Popen) -> None:
         raise
 
 
-def install_forge(current_dir):
-    1
+def install_forge(server_root: Path):
+    print("WIP")
 
 if __name__ == "__main__":
-    nametag("")
+    nametag(Path(""))

@@ -1,23 +1,22 @@
-import os
 import json
 import subprocess
-
-CONFIG_FILE = "./list.json"
+from pathlib import Path
+from modules import Settings
 
 def load_server_list():
     """加载 list.json 并解析 JSON"""
-    if not os.path.exists(CONFIG_FILE):
-        print(f"❌ 配置文件 {CONFIG_FILE} 不存在！")
+    if not Settings.LIST_PATH.exists():
+        print(f"❌ 配置文件 {Settings.LIST_PATH} 不存在！")
         return []
 
     try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as file:
+        with open(Settings.LIST_PATH, "r", encoding="utf-8") as file:
             return json.load(file)
     except json.JSONDecodeError as e:
         print(f"❌ 解析 JSON 出错: {e}")
         return []
 
-def launch(current_server,current_dir,gui):
+def launch(current_server, server_root: Path, gui: bool):
     """启动指定的 Minecraft 服务器"""
     servers = load_server_list()
     if not servers:
@@ -31,7 +30,7 @@ def launch(current_server,current_dir,gui):
 
     fullpath = selected_server["jar_path"]
 
-    if not os.path.exists(fullpath):
+    if not Path(fullpath).exists():
         print(f"❌ JAR 文件未找到: {fullpath}")
         return
 
@@ -39,11 +38,11 @@ def launch(current_server,current_dir,gui):
     print(f"📂 服务器核心路径: {fullpath}")
 
     try:
-        os.chdir(os.path.join(current_dir, "Servers", current_server))
+        workdir = server_root / current_server
         if not gui:
-            subprocess.run(["java", "-jar", fullpath,"-nogui"], check=True)
+            subprocess.run(["java", "-jar", fullpath, "-nogui"], check=True, cwd=workdir)
         elif gui:
-            subprocess.run(["java", "-jar", fullpath], check=True)
+            subprocess.run(["java", "-jar", fullpath], check=True, cwd=workdir)
         else:
             print(f"❌ 未传递gui参数或参数出现问题")
     except subprocess.CalledProcessError as e:
@@ -52,4 +51,4 @@ def launch(current_server,current_dir,gui):
         print("❌ 未找到 Java，请确保 Java 已正确安装并添加到环境变量！")
 
 if __name__ == "__main__":
-    launch("1.21.4-Fabric")  # 测试启动
+    launch("1.21.4-Fabric", Settings.DEFAULT_SERVERS_DIR, False)  # 测试启动
