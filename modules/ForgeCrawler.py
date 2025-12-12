@@ -10,9 +10,9 @@ selected_item = None
 
 
 def forge_crawler(current_dir):
+    # 获取终端宽度
     terminal_width, _ = shutil.get_terminal_size()
 
-    # TODO: 拉取 Forge 版本信息
     response = requests.get("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json")
     versions = response.json()
 
@@ -31,50 +31,62 @@ def forge_crawler(current_dir):
     select_version("Minecraft", game_versions, terminal_width)
     current_minecraft_version = selected_item
 
-    # 2. 选择 Forge 版本
+    # 2. 选择 Forge Mod Loader版本
     response = requests.get("https://files.minecraftforge.net/net/minecraftforge/forge/maven-metadata.json")
     FMLversions = response.json()
     response = requests.get("https://files.minecraftforge.net/net/minecraftforge/forge/promotions_slim.json")
     promo = response.json()
 
     loader_versions = FMLversions.get(current_minecraft_version, [])
+    loader_versions = list(reversed(loader_versions))
 
-    # 标记推荐（或最新）版本，用于界面高亮
+    # 标记推荐版本，用于💡————傻逼啊，Fabric一个api全部给明白的，Forge得request三次。
     promos = promo.get("promos", {})
     recommended_key = f"{current_minecraft_version}-recommended"
     latest_key = f"{current_minecraft_version}-latest"
     highlight_version = promos.get(recommended_key) or promos.get(latest_key)
 
-    if highlight_version:
-        loader_versions = [
-            {"version": v, "recommended": True} if v == highlight_version else v
-            for v in loader_versions
-        ]
-
-    select_version("Forge Loader", loader_versions, terminal_width)
+    select_version("Forge Loader", loader_versions, terminal_width, highlight_version)
     current_forge_version = (
         selected_item.get("version") if isinstance(selected_item, dict) else selected_item
     )
 
-    # 3. 下载服务器 Jar（占位）
-    download_url = None  # TODO: 构造下载链接
+    # 3. 下载Installer Jar
     if current_minecraft_version and current_forge_version:
-        print(f"TODO: 下载 Forge Server，MC {current_minecraft_version}, Forge {current_forge_version}")
+        download_url = (
+            f"https://maven.minecraftforge.net/net/minecraftforge/forge/"
+            f"{current_forge_version}/forge-{current_forge_version}-installer.jar"
+        )
+        filename = f"forge-{current_forge_version}-installer.jar"
+        filepath = os.path.join(current_dir, filename)
+
+        try:
+            with requests.get(download_url, stream=True) as resp:
+                print(f"\n正在下载Forge Installer: {download_url}")
+                resp.raise_for_status()
+                with open(filepath, "wb") as file:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        if chunk:
+                            file.write(chunk)
+                print(f"\n下载完成! 文件已保存至: {filepath}")
+            return filepath, current_minecraft_version, current_forge_version
+        except Exception as e:
+            print(f"下载失败: {e}")
+            return None
     else:
-        print("占位：缺少版本信息，无法下载。")
+        print("缺少版本信息，无法下载。")
         return None
 
-    # TODO: 下载并保存文件，与 FabricCrawler 逻辑类似
-    # filepath = os.path.join(current_dir, filename)
-    # return filepath, current_minecraft_version, current_forge_version
 
-
-def select_version(version_type, versions, terminal_width):
+def select_version(version_type, versions, terminal_width, highlight_version=None):
     global selected_item
 
     # 根据版本类型调整显示 - 同时支持字符串和字典格式的版本
     def get_name(v):
         if isinstance(v, str):
+            # 检查是否需要高亮显示（仅在显示时添加💡，不修改原始字符串）
+            if highlight_version and (v.endswith(f"-{highlight_version}") or v == highlight_version):
+                return f"💡{v}"
             return v
         # 字典格式：为稳定版添加emoji标记
         return f"💡{v['version']}" if v.get("stable") else v["version"]

@@ -29,31 +29,45 @@ def fabric_crawler(current_dir):
     select_version("Installer", installer_versions, terminal_width)
     current_installer_version = selected_item["version"]
 
+    # 清清爽爽，干干净净💀
+    
     # 下载服务器Jar文件
-    download_url = f"https://meta.fabricmc.net/v2/versions/loader/{current_minecraft_version}/{current_fabric_loader_version}/{current_installer_version}/server/jar"
+    if current_minecraft_version and current_fabric_loader_version and current_installer_version:
+        download_url = (
+        f"https://meta.fabricmc.net/v2/versions/loader/"
+        f"{current_minecraft_version}/{current_fabric_loader_version}/"
+        f"{current_installer_version}/server/jar"
+        )
 
-    print(f"\n正在下载Fabric Server: {download_url}")
+        try:
+            with requests.get(download_url, stream=True) as resp:
+                print(f"\n正在下载Fabric Server: {download_url}")
+                resp.raise_for_status()
 
-    response = requests.get(download_url, stream=True)
+                if "Content-Disposition" in resp.headers:
+                    content_disposition = resp.headers["Content-Disposition"]
+                    filename = content_disposition.split("filename=")[1].strip('"')
+                else:
+                    filename = (
+                        f"fabric-server-mc.{current_minecraft_version}-"
+                        f"loader.{current_fabric_loader_version}-"
+                        f"launcher.{current_installer_version}.jar"
+                    )
 
-    # 获取文件名
-    if "Content-Disposition" in response.headers:
-        content_disposition = response.headers["Content-Disposition"]
-        filename = content_disposition.split("filename=")[1].strip('"')
+                filepath = os.path.join(current_dir, filename)
+                with open(filepath, "wb") as file:
+                    for chunk in resp.iter_content(chunk_size=8192):
+                        if chunk:
+                            file.write(chunk)
+
+            print(f"\n下载完成! 文件已保存至: {filepath}")
+            return filepath, current_minecraft_version, current_fabric_loader_version
+        except Exception as e:
+            print(f"下载失败: {e}")
+            return None
     else:
-        filename = f"fabric-server-mc.{current_minecraft_version}-loader.{current_fabric_loader_version}-launcher.{current_installer_version}.jar"
-
-    # 保存文件
-    filepath = os.path.join(current_dir, filename)
-
-    with open(filepath, 'wb') as f:
-        for chunk in response.iter_content(chunk_size=8192):
-            if chunk:
-                f.write(chunk)
-
-    print(f"\n下载完成! 文件已保存至: {filepath}")
-    return filepath,current_minecraft_version, current_fabric_loader_version
-
+        print("缺少版本信息，无法下载。")
+        return None
 
 # 全局变量存储选中的项目
 selected_item = None
@@ -143,4 +157,4 @@ def select_version(version_type, versions, terminal_width):
 if __name__ == "__main__":
     # 测试函数
     current_dir = os.getcwd()
-    fabric_crawler(r"C:\Users\tempusr\Documents\Jartender\Servers\1.21.4-Test")
+    fabric_crawler(r"/Users/fanxuancheng/Documents/GitHub/Jartender/Servers/testfabric/")
