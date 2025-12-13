@@ -81,7 +81,7 @@ python3 jartender.py
 
 欢迎提交 Issue 和 Pull Request！
 
-__我正在寻找一位具有TUI开发经验的人，如果你感兴趣请联系我。__
+__我正在寻找一位具有TUI(Textual最佳)开发经验的人，如果您感兴趣请联系我。__
 
 ---
 

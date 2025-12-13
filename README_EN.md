@@ -81,7 +81,7 @@ This project is licensed under the [GNU General Public License v3.0](LICENSE).
 
 Issues and Pull Requests are welcome!
 
-__I'm looking for someone with TUI development experience. If you're interested, please contact me.__
+__I'm looking for someone with TUI (Textual) development experience. If you're interested, please contact me.__
 
 ---
 
