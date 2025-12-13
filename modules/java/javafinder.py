@@ -1,10 +1,51 @@
+# I thought this would be easy, but it's not. I'm even not sure if this is correct on Linux.
+# I still have to implement the FreeBSD and OpenBSD support. Honestly, I even don't know How to use those systems.
+
+# SPDX-License-Identifier: GPL-3.0-only
+#
+# This file incorporates work covered by the following copyright and
+# permission notice:
+#
+#      Prism Launcher - Minecraft Launcher
+#      Copyright (C) 2022 Sefa Eyeoglu <contact@scrumplex.net>
+#
+#      This program is free software: you can redistribute it and/or modify
+#      it under the terms of the GNU General Public License as published by
+#      the Free Software Foundation, version 3.
+#
+#      This program is distributed in the hope that it will be useful,
+#      but WITHOUT ANY WARRANTY; without even the implied warranty of
+#      MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#      GNU General Public License for more details.
+#
+#      You should have received a copy of the GNU General Public License
+#      along with this program.  If not, see <https://www.gnu.org/licenses/>.
+#
+# This file also incorporates work covered by the following copyright and
+# permission notice:
+#
+#      Copyright 2013-2021 MultiMC Contributors
+#
+#      Licensed under the Apache License, Version 2.0 (the "License");
+#      you may not use this file except in compliance with the License.
+#      You may obtain a copy of the License at
+#
+#          http://www.apache.org/licenses/LICENSE-2.0
+#
+#      Unless required by applicable law or agreed to in writing, software
+#      distributed under the License is distributed on an "AS IS" BASIS,
+#      WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+#      See the License for the specific language governing permissions and
+#      limitations under the License.
+
 import os
 import sys
 import platform
+import shutil
 from pathlib import Path
-from typing import Literal, TypedDict, List
+from typing import Literal, TypedDict, List, Callable, Optional
 
-# Windows 注册表访问
+# Windows Reg Access
 if platform.system() == "Windows":
     try:
         import winreg
@@ -13,7 +54,6 @@ if platform.system() == "Windows":
 else:
     winreg = None
 
-# 允许作为脚本直接运行
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
@@ -133,6 +173,134 @@ def _macos_candidates() -> List[Path]:
     if java_home:
         candidates.append(Path(java_home) / "bin/java")
 
+    return _unique_existing(candidates)
+
+
+def _linux_candidates() -> List[Path]:
+    """查找 Linux 上的 Java 安装路径"""
+    candidates = []
+    
+    # 默认 Java
+    default_java = shutil.which("java")
+    if default_java:
+        candidates.append(Path(default_java))
+    
+    # 扫描 Java 目录函数
+    def scan_java_dir(
+        dir_path: Path,
+        filter_func: Optional[Callable[[Path], bool]] = None
+    ) -> None:
+        """扫描目录，查找 Java 安装"""
+        if not dir_path.exists() or not dir_path.is_dir():
+            return
+        
+        try:
+            for entry in dir_path.iterdir():
+                if not entry.is_dir() or entry.name in (".", ".."):
+                    continue
+                
+                # 如果提供了过滤函数，检查是否通过过滤
+                if filter_func and not filter_func(entry):
+                    continue
+                
+                # 尝试两个可能的路径
+                prefix = entry.resolve()
+                candidates.append(prefix / "jre" / "bin" / "java")
+                candidates.append(prefix / "bin" / "java")
+        except (PermissionError, OSError):
+            pass
+    
+    # SNAP
+    snap = os.environ.get("SNAP")
+    
+    def scan_java_dirs(dir_path_str: str) -> None:
+        """扫描目录，如果存在 SNAP 环境变量，也扫描 SNAP 下的对应目录"""
+        dir_path = Path(dir_path_str)
+        scan_java_dir(dir_path)
+        
+        if snap:
+            snap_dir = Path(snap) / dir_path_str.lstrip("/")
+            scan_java_dir(snap_dir)
+    
+    # Oracle RPMs
+    scan_java_dirs("/usr/java")
+    
+    # 通用
+    scan_java_dirs("/usr/lib/jvm")
+    scan_java_dirs("/usr/lib64/jvm")
+    scan_java_dirs("/usr/lib32/jvm")
+    
+    # Gentoo
+    def gentoo_filter(entry: Path) -> bool:
+        """Gentoo 过滤器：匹配 openjdk- 或 openj9- 开头的目录"""
+        name = entry.name
+        return name.startswith("openjdk-") or name.startswith("openj9-")
+    
+    scan_java_dir(Path("/usr/lib64"), gentoo_filter)
+    scan_java_dir(Path("/usr/lib"), gentoo_filter)
+    scan_java_dir(Path("/opt"), gentoo_filter)
+    
+    # AOSC OS 
+    def aosc_filter(entry: Path) -> bool:
+        """AOSC OS 过滤器：匹配 java 或以 java- 开头的目录"""
+        name = entry.name
+        return name == "java" or name.startswith("java-")
+    
+    scan_java_dir(Path("/usr/lib"), aosc_filter)
+    
+    # Prism Launcher
+    home = Path(os.environ.get("HOME", ""))
+    xdg_data_home = os.environ.get("XDG_DATA_HOME")
+    if xdg_data_home:
+        prism_java_dir = Path(xdg_data_home) / "PrismLauncher" / "java"
+    else:
+        prism_java_dir = home / ".local" / "share" / "PrismLauncher" / "java"
+    scan_java_dir(prism_java_dir)
+    
+    project_root = Path(__file__).resolve().parents[2]
+    project_java_dir = project_root / "java"
+    scan_java_dir(project_java_dir)
+    
+    # 手动安装的 JDK
+    scan_java_dirs("/opt/jdk")
+    scan_java_dirs("/opt/jdks")
+    scan_java_dirs("/opt/ibm")  # IBM Semeru Certified Edition
+    
+    # Flatpak
+    scan_java_dirs("/app/jdk")
+    
+    # JAVA_HOME
+    java_home = os.environ.get("JAVA_HOME")
+    if java_home:
+        java_home_path = Path(java_home)
+        candidates.append(java_home_path / "bin" / "java")
+        candidates.append(java_home_path / "jre" / "bin" / "java")
+    
+    # PATH
+    path_env = os.environ.get("PATH", "")
+    for path_str in path_env.split(os.pathsep):
+        if path_str:
+            java_path = Path(path_str) / "java"
+            if java_path.exists() and java_path.is_file():
+                candidates.append(java_path)
+    
+    # sdkman
+    home = Path(os.environ.get("HOME", ""))
+    sdkman_dir = Path(os.environ.get("SDKMAN_DIR", home / ".sdkman"))
+    sdkman_java_dir = sdkman_dir / "candidates" / "java"
+    if sdkman_java_dir.exists():
+        for java_version_dir in sdkman_java_dir.iterdir():
+            if java_version_dir.is_dir():
+                candidates.append(java_version_dir / "bin" / "java")
+    
+    # asdf
+    asdf_dir = Path(os.environ.get("ASDF_DATA_DIR", home / ".asdf"))
+    asdf_java_dir = asdf_dir / "installs" / "java"
+    if asdf_java_dir.exists():
+        for java_version_dir in asdf_java_dir.iterdir():
+            if java_version_dir.is_dir():
+                candidates.append(java_version_dir / "bin" / "java")
+    
     return _unique_existing(candidates)
 
 
@@ -431,6 +599,68 @@ def find_java():
             print("-" * len(header_line))
             for row in rows:
                 print(fmt(row))
+                
+    elif info["os"] == "Linux":
+        paths = _linux_candidates()
+        if not paths:
+            print("未找到任何已存在的 Java 可执行文件。")
+        else:
+            print("发现：")
+            rows = []
+            for idx, p in enumerate(paths, 1):
+                meta = javainvestigator.probe_show_settings(str(p))
+                rows.append(
+                    {
+                        "idx": str(idx),
+                        "version": meta.get("version") or "Unknown",
+                        "vendor": meta.get("vendor_version") or "Unknown",
+                        "arch": meta.get("arch") or "Unknown",
+                        "path": str(p),
+                    }
+                )
+
+            # 按版本号升序排序
+            rows.sort(key=lambda row: _parse_version(row["version"]))
+
+            # 更新索引
+            for idx, row in enumerate(rows, 1):
+                row["idx"] = str(idx)
+
+            # 动态列宽对齐
+            headers = {"idx": "#", "version": "版本", "vendor": "名称", "arch": "架构", "path": "路径"}
+            col_widths = {
+                key: max(len(headers[key]), *(len(row[key]) for row in rows))
+                for key in headers
+            }
+
+            def fmt(row):
+                return " | ".join(
+                    [
+                        row["idx"].rjust(col_widths["idx"]),
+                        row["version"].ljust(col_widths["version"]),
+                        row["vendor"].ljust(col_widths["vendor"]),
+                        row["arch"].ljust(col_widths["arch"]),
+                        row["path"],
+                    ]
+                )
+
+            header_line = " | ".join(
+                [
+                    headers["idx"].rjust(col_widths["idx"]),
+                    headers["version"].ljust(col_widths["version"]),
+                    headers["vendor"].ljust(col_widths["vendor"]),
+                    headers["arch"].ljust(col_widths["arch"]),
+                    headers["path"],
+                ]
+            )
+            print(header_line)
+            print("-" * len(header_line))
+            for row in rows:
+                print(fmt(row))
+    else:
+        print(f"不支持的操作系统: {info['os']}")
+
+# This is the biggest module in the project. Java and Windows Registry: HUGE SHIT.
 
 if __name__ == "__main__":
     find_java()
