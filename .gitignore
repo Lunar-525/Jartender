@@ -13,6 +13,9 @@ list.json.dis
 config.json.dis
 config.json
 list.json
-
+.DS_Store
+config.json
+java_list.json
+list.json
 
 replace.txt
