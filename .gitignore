@@ -2,8 +2,6 @@ Servers/
 modules/__pycache__/
 __pycache__/
 test.py
-config.json
-list.json
 .idea/
 .fabric/
 out/
@@ -11,11 +9,11 @@ jartender.exe
 TestFolder/
 list.json.dis
 config.json.dis
-config.json
 list.json
-.DS_Store
 config.json
 java_list.json
-list.json
+
 
 replace.txt
+
+.DS_Store
