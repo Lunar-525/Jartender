@@ -5,19 +5,11 @@ from typing import Dict, Optional
 
 def check_java_with_code(java_path: str) -> dict:
     """用 Java 代码检测架构（更详细）"""
+    # 弃用。反正我觉得暂时用不到。
     
-    # 创建临时 Java 文件
-    java_code = """
-public class ArchCheck {
-    public static void main(String[] args) {
-        System.out.println("os.arch=" + System.getProperty("os.arch"));
-        System.out.println("os.name=" + System.getProperty("os.name"));
-        System.out.println("java.version=" + System.getProperty("java.version"));
-        System.out.println("java.vendor=" + System.getProperty("java.vendor"));
-        System.out.println("java.home=" + System.getProperty("java.home"));
-    }
-}
-"""
+    # 读取外部 Java 文件
+    java_file_path = Path(__file__).parent / "ArchCheck.java"
+    java_code = java_file_path.read_text(encoding="utf-8")
     
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
