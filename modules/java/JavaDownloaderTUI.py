@@ -17,23 +17,19 @@ from textual_sortable_datatable import SortableDataTable
 
 # --- 颜色主题定义 ---
 class Theme:
-    """颜色主题类，集中管理所有颜色定义"""
-    
-    # 主题模式: "dark" 或 "light"
+
+    # "dark" or "light"
     MODE = "dark"
     
-    # 品牌色（固定，不随主题变化）
-    brand_mojang = "#F0313B"    # Mojang 红
-    brand_adoptium = "#E3186A"  # Adoptium 粉
-    brand_azul = "#418CA6"      # Azul 蓝
+    brand_mojang = "#F0313B"    # Mojang 
+    brand_adoptium = "#E3186A"  # Adoptium 
+    brand_azul = "#418CA6"      # Azul 
     
-    # 强调色
     accent = "#70D6FF"          # 主强调色
 
 
     @classmethod
     def _get_colors(cls):
-        """根据 MODE 返回对应的颜色配置"""
         if cls.MODE == "dark":
             return {
                 "bg_status_ready" : "#253328",
@@ -107,8 +103,8 @@ class Theme:
     @property
     def border_light(cls): return cls._get_colors()["border_light"]
 
+    # 这里classmethod是不是写的有点......
 
-# --- CSS 样式定义 ---
 TCSS = f"""
 Screen {{
     background: {Theme.bg_primary};
@@ -302,7 +298,6 @@ Checkbox {{
 """
 
 class SidebarItem(Static):
-    """自定义侧边栏项目"""
     def __init__(self, label: str, icon: str, brand_class: str, is_active: bool = False):
         # 构建 CSS 类字符串
         css_classes = brand_class
@@ -371,7 +366,7 @@ class InstallJavaScreen(Screen):
         table.add_row("17.0.2", "azul_zulu_jre17.0.2", "1/8/22", "jre")
 
     def on_list_view_highlighted(self, event: ListView.Highlighted) -> None:
-        """当 ListView 高亮项变化时触发"""
+        """!!! 当 ListView 高亮项变化时触发"""
         # 移除所有 ListItem 的 -active 类
         for item in self.query("ListItem"):
             item.remove_class("-active")

@@ -4,20 +4,18 @@ from pathlib import Path
 from typing import Dict, Optional
 
 def check_java_with_code(java_path: str) -> dict:
-    """用 Java 代码检测架构（更详细）"""
+
     # 弃用。反正我觉得暂时用不到。
     
-    # 读取外部 Java 文件
     java_file_path = Path(__file__).parent / "ArchCheck.java"
     java_code = java_file_path.read_text(encoding="utf-8")
     
     with tempfile.TemporaryDirectory() as tmpdir:
         tmpdir = Path(tmpdir)
         java_file = tmpdir / "ArchCheck.java"
-        java_file.write_text(java_code)
+        java_file.write_text(java_code, encoding="utf-8")
         
         try:
-            # 编译
             subprocess.run(
                 [java_path.replace('/java', '/javac'), str(java_file)],
                 check=True,
@@ -25,7 +23,6 @@ def check_java_with_code(java_path: str) -> dict:
                 timeout=10
             )
             
-            # 运行
             result = subprocess.run(
                 [java_path, "-cp", str(tmpdir), "ArchCheck"],
                 capture_output=True,
@@ -33,7 +30,6 @@ def check_java_with_code(java_path: str) -> dict:
                 timeout=10
             )
             
-            # 解析输出
             data = {}
             for line in result.stdout.split('\n'):
                 if '=' in line:
@@ -57,8 +53,9 @@ def check_java_with_code(java_path: str) -> dict:
 
 def probe_show_settings(java_path: str) -> Dict[str, Optional[str]]:
     """
-    Run `java -XshowSettings:properties -version` and parse key props.
+    java -XshowSettings:properties -version
     Returns version/vendor_version/arch along with raw path.
+    这不比上面那个简单多了吗, 也不用区分是Java8还是Java17+。
     """
     try:
         result = subprocess.run(
