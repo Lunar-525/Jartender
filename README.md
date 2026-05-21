@@ -4,6 +4,8 @@
 
 [English](https://github.com/tucaoba2333/Jartender/blob/main/README_EN.md) here.
 
+__我正在将这个项目迁移到Rust+Godot。__
+
 Jartender 是一款~~简洁易用~~的 CLI 工具，用于管理和操作 Minecraft 服务器核心。它提供了服务器扫描、安装、启动和管理等功能，支持 Windows、macOS 和 Linux 三大主流操作系统。
 
 ## 主要特性
