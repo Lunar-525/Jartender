@@ -1,27 +1,4 @@
-import json
-from pathlib import Path
-from modules import Settings, java
-from modules.java import javafinder
-
-JAVA_LIST_PATH = Path(__file__).resolve().parent.parent.parent / "java_list.json"
-
-
-def ensure_java_list():
-    """Ensure java_list.json exists with an empty array."""
-    if not JAVA_LIST_PATH.exists():
-        JAVA_LIST_PATH.write_text("[]", encoding="utf-8")
-
-
-def load_java_list():
-    ensure_java_list()
-    try:
-        return json.loads(JAVA_LIST_PATH.read_text(encoding="utf-8"))
-    except json.JSONDecodeError:
-        return []
-
-
-def save_java_list(data):
-    JAVA_LIST_PATH.write_text(json.dumps(data, indent=4, ensure_ascii=False), encoding="utf-8")
+from modules.java import javafinder, javalist
 
 
 def main_menu():
@@ -47,7 +24,7 @@ def main_menu():
 
 def manage_java():
     """Placeholder: list installed/registered Java entries from json."""
-    java_list = load_java_list()
+    java_list = javalist.load_java_list()
     if not java_list:
         print("尚未记录任何 Java 版本。")
         return

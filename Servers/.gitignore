@@ -1,0 +1,5 @@
+# Local server installations kept out of version control:
+# JARs, downloaded libraries, generated worlds, logs and EULA state.
+# The directory itself is kept so `jartender list` has a stable default root.
+*
+!.gitignore

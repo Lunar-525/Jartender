@@ -1,0 +1,27 @@
+[package]
+name = "jartender"
+version = "0.1.0"
+edition = "2024"
+description = "Install and run Minecraft servers from the terminal"
+license = "GPL-3.0-only"
+
+[features]
+default = ["cli"]
+cli = ["dep:clap"]
+
+[[bin]]
+name = "jartender"
+path = "src/main.rs"
+required-features = ["cli"]
+
+[dependencies]
+clap = { version = "4.6", features = ["derive"], optional = true }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+ureq = "3.5"
+zip = { version = "9.2", default-features = false, features = ["deflate-flate2-zlib-rs"] }
+tempfile = "3"
+
+[profile.release]
+lto = "thin"
+strip = true

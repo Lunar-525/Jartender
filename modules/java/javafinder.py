@@ -58,7 +58,7 @@ PROJECT_ROOT = Path(__file__).resolve().parents[2]
 if str(PROJECT_ROOT) not in sys.path:
     sys.path.insert(0, str(PROJECT_ROOT))
 
-from modules.java import javainvestigator
+from modules.java import javainvestigator, javalist
 
 OSType = Literal["Windows", "Linux", "macOS", "Unknown"]
 
@@ -134,6 +134,75 @@ def _parse_version(version_str: str) -> tuple:
             return (999999,)
     except (ValueError, AttributeError):
         return (999999,)
+
+
+def _build_rows(paths: List[Path]) -> List[dict]:
+    """Probe Java executables and build normalized rows."""
+    rows = []
+    for p in paths:
+        meta = javainvestigator.probe_show_settings(str(p))
+        vendor = meta.get("vendor_version") or meta.get("vendor")
+        rows.append(
+            {
+                "version": meta.get("version") or "Unknown",
+                "vendor": vendor or "Unknown",
+                "vendor_version": meta.get("vendor_version"),
+                "arch": meta.get("arch") or "Unknown",
+                "path": str(p),
+            }
+        )
+
+    rows.sort(key=lambda row: _parse_version(row["version"]))
+    for idx, row in enumerate(rows, 1):
+        row["idx"] = str(idx)
+    return rows
+
+
+def _print_rows(rows: List[dict]) -> None:
+    """Print rows in a table-like format."""
+    headers = {"idx": "#", "version": "版本", "vendor": "名称", "arch": "架构", "path": "路径"}
+    col_widths = {
+        key: max(len(headers[key]), *(len(str(row.get(key, ""))) for row in rows))
+        for key in headers
+    }
+
+    def fmt(row: dict) -> str:
+        return " | ".join(
+            [
+                str(row.get("idx", "")).rjust(col_widths["idx"]),
+                str(row.get("version", "")).ljust(col_widths["version"]),
+                str(row.get("vendor", "")).ljust(col_widths["vendor"]),
+                str(row.get("arch", "")).ljust(col_widths["arch"]),
+                str(row.get("path", "")),
+            ]
+        )
+
+    header_line = " | ".join(
+        [
+            headers["idx"].rjust(col_widths["idx"]),
+            headers["version"].ljust(col_widths["version"]),
+            headers["vendor"].ljust(col_widths["vendor"]),
+            headers["arch"].ljust(col_widths["arch"]),
+            headers["path"],
+        ]
+    )
+    print(header_line)
+    print("-" * len(header_line))
+    for row in rows:
+        print(fmt(row))
+
+
+def _display_and_store(paths: List[Path]) -> List[dict]:
+    """Handle empty results, print table, and persist to java_list.json."""
+    if not paths:
+        print("未找到任何已存在的 Java 可执行文件。")
+        return []
+
+    print("发现：")
+    rows = _build_rows(paths)
+    _print_rows(rows)
+    javalist.upsert_entries(rows)
+    return rows
 
 
 def _macos_candidates() -> List[Path]:
@@ -485,180 +554,13 @@ def find_java():
     info = detect_os()
     print(f"{info['os']} ({info['raw']})")
     if info["os"] == "macOS":
-        paths = _macos_candidates()
-        if not paths:
-            print("未找到任何已存在的 Java 可执行文件。")
-        else:
-            print("发现：")
-            rows = []
-            for idx, p in enumerate(paths, 1):
-                meta = javainvestigator.probe_show_settings(str(p))
-                rows.append(
-                    {
-                        "idx": str(idx),
-                        "version": meta.get("version") or "Unknown",
-                        "vendor": meta.get("vendor_version") or "Unknown",
-                        "arch": meta.get("arch") or "Unknown",
-                        "path": str(p),
-                    }
-                )
-
-            # 按版本号升序排序
-            rows.sort(key=lambda row: _parse_version(row["version"]))
-
-            # 更新索引
-            for idx, row in enumerate(rows, 1):
-                row["idx"] = str(idx)
-
-            # 动态列宽对齐
-            headers = {"idx": "#", "version": "版本", "vendor": "名称", "arch": "架构", "path": "路径"}
-            col_widths = {
-                key: max(len(headers[key]), *(len(row[key]) for row in rows))
-                for key in headers
-            }
-
-            def fmt(row):
-                return " | ".join(
-                    [
-                        row["idx"].rjust(col_widths["idx"]),
-                        row["version"].ljust(col_widths["version"]),
-                        row["vendor"].ljust(col_widths["vendor"]),
-                        row["arch"].ljust(col_widths["arch"]),
-                        row["path"],
-                    ]
-                )
-
-            header_line = " | ".join(
-                [
-                    headers["idx"].rjust(col_widths["idx"]),
-                    headers["version"].ljust(col_widths["version"]),
-                    headers["vendor"].ljust(col_widths["vendor"]),
-                    headers["arch"].ljust(col_widths["arch"]),
-                    headers["path"],
-                ]
-            )
-            print(header_line)
-            print("-" * len(header_line))
-            for row in rows:
-                print(fmt(row))
-                
-    elif info["os"] == "Windows":
-        paths = _windows_candidates()
-        if not paths:
-            print("未找到任何已存在的 Java 可执行文件。")
-        else:
-            print("发现：")
-            rows = []
-            for idx, p in enumerate(paths, 1):
-                meta = javainvestigator.probe_show_settings(str(p))
-                rows.append(
-                    {
-                        "idx": str(idx),
-                        "version": meta.get("version") or "Unknown",
-                        "vendor": meta.get("vendor_version") or "Unknown",
-                        "arch": meta.get("arch") or "Unknown",
-                        "path": str(p),
-                    }
-                )
-
-            # 按版本号升序排序
-            rows.sort(key=lambda row: _parse_version(row["version"]))
-
-            # 更新索引
-            for idx, row in enumerate(rows, 1):
-                row["idx"] = str(idx)
-
-            # 动态列宽对齐
-            headers = {"idx": "#", "version": "版本", "vendor": "名称", "arch": "架构", "path": "路径"}
-            col_widths = {
-                key: max(len(headers[key]), *(len(row[key]) for row in rows))
-                for key in headers
-            }
-
-            def fmt(row):
-                return " | ".join(
-                    [
-                        row["idx"].rjust(col_widths["idx"]),
-                        row["version"].ljust(col_widths["version"]),
-                        row["vendor"].ljust(col_widths["vendor"]),
-                        row["arch"].ljust(col_widths["arch"]),
-                        row["path"],
-                    ]
-                )
-
-            header_line = " | ".join(
-                [
-                    headers["idx"].rjust(col_widths["idx"]),
-                    headers["version"].ljust(col_widths["version"]),
-                    headers["vendor"].ljust(col_widths["vendor"]),
-                    headers["arch"].ljust(col_widths["arch"]),
-                    headers["path"],
-                ]
-            )
-            print(header_line)
-            print("-" * len(header_line))
-            for row in rows:
-                print(fmt(row))
-                
-    elif info["os"] == "Linux":
-        paths = _linux_candidates()
-        if not paths:
-            print("未找到任何已存在的 Java 可执行文件。")
-        else:
-            print("发现：")
-            rows = []
-            for idx, p in enumerate(paths, 1):
-                meta = javainvestigator.probe_show_settings(str(p))
-                rows.append(
-                    {
-                        "idx": str(idx),
-                        "version": meta.get("version") or "Unknown",
-                        "vendor": meta.get("vendor_version") or "Unknown",
-                        "arch": meta.get("arch") or "Unknown",
-                        "path": str(p),
-                    }
-                )
-
-            # 按版本号升序排序
-            rows.sort(key=lambda row: _parse_version(row["version"]))
-
-            # 更新索引
-            for idx, row in enumerate(rows, 1):
-                row["idx"] = str(idx)
-
-            # 动态列宽对齐
-            headers = {"idx": "#", "version": "版本", "vendor": "名称", "arch": "架构", "path": "路径"}
-            col_widths = {
-                key: max(len(headers[key]), *(len(row[key]) for row in rows))
-                for key in headers
-            }
-
-            def fmt(row):
-                return " | ".join(
-                    [
-                        row["idx"].rjust(col_widths["idx"]),
-                        row["version"].ljust(col_widths["version"]),
-                        row["vendor"].ljust(col_widths["vendor"]),
-                        row["arch"].ljust(col_widths["arch"]),
-                        row["path"],
-                    ]
-                )
-
-            header_line = " | ".join(
-                [
-                    headers["idx"].rjust(col_widths["idx"]),
-                    headers["version"].ljust(col_widths["version"]),
-                    headers["vendor"].ljust(col_widths["vendor"]),
-                    headers["arch"].ljust(col_widths["arch"]),
-                    headers["path"],
-                ]
-            )
-            print(header_line)
-            print("-" * len(header_line))
-            for row in rows:
-                print(fmt(row))
-    else:
-        print(f"不支持的操作系统: {info['os']}")
+        return _display_and_store(_macos_candidates())
+    if info["os"] == "Windows":
+        return _display_and_store(_windows_candidates())
+    if info["os"] == "Linux":
+        return _display_and_store(_linux_candidates())
+    print(f"不支持的操作系统: {info['os']}")
+    return []
 
 # This is the biggest module in the project. Java and Windows Registry: HUGE SHIT.
 
