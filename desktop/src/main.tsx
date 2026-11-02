@@ -160,7 +160,16 @@ function App() {
       void call("set_hit_regions", { regions }).catch(() => {});
     });
     return () => cancelAnimationFrame(frame);
-  }, [viewport, modal, expanded, error, notice, pickerOpen, data.servers.length, data.installing.length]);
+  }, [
+    viewport,
+    modal,
+    expanded,
+    error,
+    notice,
+    pickerOpen,
+    data.servers.length,
+    data.installing.length,
+  ]);
 
   const select = (name: string) => {
     selectedRef.current = name;
@@ -385,243 +394,247 @@ function App() {
         style={{ transform: `translate(-50%, -50%) scale(${surfaceScale})` }}
       >
         <div className="design-artboard">
-        <div className="white-frame" aria-hidden="true">
-          <FabricBackground />
-        </div>
-        <header
-          className="titlebar"
-          data-tauri-drag-region
-          onDoubleClick={() => {
-            if (native) void getCurrentWindow().toggleMaximize();
-          }}
-        >
-          <img className="title-line" src={design("66c08.svg")} alt="" />
-          <h1 data-tauri-drag-region>JarTender</h1>
-          <div className="window-controls">
-            <button
-              aria-label="最小化"
-              onClick={() => {
-                if (native) void getCurrentWindow().minimize();
-              }}
-            >
-              <img src={design("331a6.svg")} alt="" />
-            </button>
-            <button
-              aria-label="关闭"
-              onClick={() => {
-                if (native) void getCurrentWindow().close();
-              }}
-            >
-              <img src={design("6772f.svg")} alt="" />
-            </button>
+          <div className="white-frame" aria-hidden="true">
+            <FabricBackground />
           </div>
-        </header>
-        <aside className="sidebar">
-          <div className="about">
-            <p>Jartender Version 0.1.0 Beta</p>
-            <p>Tauri desktop · Rust core</p>
-            <p>
-              This project is not affiliated in
-              <br />
-              any way with Mojang AB.
-            </p>
-          </div>
-          <button
-            className="settings-button asset-button"
-            aria-label="应用设置"
-            onClick={() => void open("settings")}
+          <header
+            className="titlebar"
+            data-tauri-drag-region
+            onDoubleClick={() => {
+              if (native) void getCurrentWindow().toggleMaximize();
+            }}
           >
-            <img src={design("6d453.svg")} alt="" />
-          </button>
-          <div className="instance-picker">
-            <InstanceSwitcher
-              instances={pickerInstances}
-              selected={selected}
-              open={pickerOpen && !modal}
-              loading={loading}
-              disabled={busy}
-              onOpenChange={setPickerOpen}
-              onSelect={chooseInstance}
-              onEmpty={() => void open("install")}
-            />
-            <div className="picker-actions">
+            <img className="title-line" src={design("66c08.svg")} alt="" />
+            <h1 data-tauri-drag-region>JarTender</h1>
+            <div className="window-controls">
               <button
-                className="asset-button manage-button"
-                onClick={() => void open("instances")}
-                aria-label="管理实例"
+                aria-label="最小化"
+                onClick={() => {
+                  if (native) void getCurrentWindow().minimize();
+                }}
               >
-                <img src={design("b06d8.svg")} alt="Manage Instances" />
+                <img src={design("331a6.svg")} alt="" />
               </button>
               <button
-                className="asset-button add-button"
-                onClick={() => void open("install")}
-                aria-label="添加实例"
+                aria-label="关闭"
+                onClick={() => {
+                  if (native) void getCurrentWindow().close();
+                }}
               >
-                <img src={design("3dbdf.svg")} alt="" />
+                <img src={design("6772f.svg")} alt="" />
               </button>
             </div>
-          </div>
-        </aside>
-        <section
-          className={`workspace ${expanded ? "expanded" : ""}`}
-          aria-label="服务端控制台"
-        >
-          <div className="console-wrap">
-            <img
-              className="console-background"
-              src={design("56b83.svg")}
-              alt=""
-            />
-            <div
-              className="console"
-              ref={consoleRef}
-              role="log"
-              aria-label="控制台输出"
-              tabIndex={0}
+          </header>
+          <aside className="sidebar">
+            <div className="about">
+              <p>Jartender Version 0.1.0 Beta</p>
+              <p>Tauri desktop · Rust core</p>
+              <p>
+                This project is not affiliated in
+                <br />
+                any way with Mojang AB.
+              </p>
+            </div>
+            <button
+              className="settings-button asset-button"
+              aria-label="应用设置"
+              onClick={() => void open("settings")}
             >
-              {data.logs.length ? (
-                data.logs.map((line, i) => (
-                  <div
-                    key={i}
-                    className={
-                      /error|exception|失败/i.test(line)
-                        ? "log-error"
-                        : /warn|警告/i.test(line)
-                          ? "log-warn"
-                          : ""
-                    }
-                  >
-                    {line || "\u00a0"}
-                  </div>
-                ))
-              ) : (
-                <div className="console-empty">
-                  <span className="console-prompt">&gt;_</span>
-                  <p>
-                    {!native
-                      ? "浏览器预览"
-                      : loading
-                        ? "正在读取实例…"
-                        : server
-                          ? "控制台已就绪"
-                          : "欢迎使用 JarTender"}
-                  </p>
-                  <small>
-                    {!native
-                      ? "运行 npm run desktop 以使用本地功能"
-                      : server
-                        ? "启动服务端后，运行日志将显示在这里。"
-                        : "添加一个实例，或在设置中选择服务器目录。"}
-                  </small>
-                </div>
-              )}
-            </div>
-            <form className="command-bar" onSubmit={send}>
-              <img src={design("573b8.svg")} alt="" />
-              <span>&gt;</span>
-              <input
-                aria-label="服务端指令"
-                placeholder={running ? "输入服务端指令…" : "等待服务端启动…"}
-                value={command}
-                onChange={(e) => setCommand(e.target.value)}
-                disabled={!running || busy}
-                maxLength={4096}
+              <img src={design("6d453.svg")} alt="" />
+            </button>
+            <div className="instance-picker">
+              <InstanceSwitcher
+                instances={pickerInstances}
+                selected={selected}
+                open={pickerOpen && !modal}
+                loading={loading}
+                disabled={busy}
+                onOpenChange={setPickerOpen}
+                onSelect={chooseInstance}
+                onEmpty={() => void open("install")}
               />
-              <button
-                type="submit"
-                disabled={!running || busy || !command.trim()}
-                aria-label="发送指令"
-              >
-                ↵
-              </button>
-            </form>
-            <button
-              className="console-expand asset-button"
-              aria-label={expanded ? "还原控制台" : "展开控制台"}
-              onClick={() => setExpanded(!expanded)}
-            >
-              <img src={design("2f952.svg")} alt="" />
-              <span>{expanded ? "↙" : "↗"}</span>
-            </button>
-          </div>
-          <div className="console-status">
-            <span>
-              <i className={running ? "online" : ""} />
-              {installing
-                ? "正在安装"
-                : running
-                  ? "进程运行中"
-                  : server
-                    ? "已停止"
-                    : "未选择实例"}
-            </span>
-            <label>
-              <input
-                type="checkbox"
-                checked={follow}
-                onChange={(e) => setFollow(e.target.checked)}
-              />{" "}
-              自动滚动
-            </label>
-          </div>
-          <div className="bottom-actions">
-            <div className="management">
-              <img src={design("2de31.svg")} alt="" />
-              {(
-                [
-                  "启动配置",
-                  "插件",
-                  "打开实例目录",
-                  "打开日志目录",
-                  "移入回收目录",
-                ] as const
-              ).map((label, i) => (
+              <div className="picker-actions">
                 <button
-                  key={label}
-                  aria-label={label}
-                  title={label}
-                  disabled={!server || busy || (i === 4 && running)}
-                  onClick={() => {
-                    if (i === 0) void open("config");
-                    if (i === 1) void open("plugins");
-                    if (i === 2) folder("server");
-                    if (i === 3) folder("logs");
-                    if (i === 4) void open("archive");
-                  }}
-                />
-              ))}
+                  className="asset-button manage-button"
+                  onClick={() => void open("instances")}
+                  aria-label="管理实例"
+                >
+                  <img src={design("b06d8.svg")} alt="Manage Instances" />
+                </button>
+                <button
+                  className="asset-button add-button"
+                  onClick={() => void open("install")}
+                  aria-label="添加实例"
+                >
+                  <img src={design("3dbdf.svg")} alt="" />
+                </button>
+              </div>
             </div>
-            <button
-              className={`launch-button ${running ? "is-running" : ""}`}
-              disabled={(!server && !installing) || busy || loading}
-              onClick={() =>
-                installing
-                  ? void perform(
-                      () => call("cancel_install", { name: selected }),
-                      "正在取消，请等待下载请求结束",
-                    )
+          </aside>
+          <section
+            className={`workspace ${expanded ? "expanded" : ""}`}
+            aria-label="服务端控制台"
+          >
+            <div className="console-wrap">
+              <img
+                className="console-background"
+                src={design("56b83.svg")}
+                alt=""
+              />
+              <div
+                className="console"
+                ref={consoleRef}
+                role="log"
+                aria-label="控制台输出"
+                tabIndex={0}
+              >
+                {data.logs.length ? (
+                  data.logs.map((line, i) => (
+                    <div
+                      key={i}
+                      className={
+                        /error|exception|失败/i.test(line)
+                          ? "log-error"
+                          : /warn|警告/i.test(line)
+                            ? "log-warn"
+                            : ""
+                      }
+                    >
+                      {line || "\u00a0"}
+                    </div>
+                  ))
+                ) : (
+                  <div className="console-empty">
+                    <span className="console-prompt">&gt;_</span>
+                    <p>
+                      {!native
+                        ? "浏览器预览"
+                        : loading
+                          ? "正在读取实例…"
+                          : server
+                            ? "控制台已就绪"
+                            : "欢迎使用 JarTender"}
+                    </p>
+                    <small>
+                      {!native
+                        ? "运行 npm run desktop 以使用本地功能"
+                        : server
+                          ? "启动服务端后，运行日志将显示在这里。"
+                          : "添加一个实例，或在设置中选择服务器目录。"}
+                    </small>
+                  </div>
+                )}
+              </div>
+              <form className="command-bar" onSubmit={send}>
+                <img src={design("573b8.svg")} alt="" />
+                <span>&gt;</span>
+                <input
+                  aria-label="服务端指令"
+                  placeholder={running ? "输入服务端指令…" : "等待服务端启动…"}
+                  value={command}
+                  onChange={(e) => setCommand(e.target.value)}
+                  disabled={!running || busy}
+                  maxLength={4096}
+                />
+                <button
+                  type="submit"
+                  disabled={!running || busy || !command.trim()}
+                  aria-label="发送指令"
+                >
+                  ↵
+                </button>
+              </form>
+              <button
+                className="console-expand asset-button"
+                aria-label={expanded ? "还原控制台" : "展开控制台"}
+                onClick={() => setExpanded(!expanded)}
+              >
+                <img src={design("2f952.svg")} alt="" />
+                <span>{expanded ? "↙" : "↗"}</span>
+              </button>
+            </div>
+            <div className="console-status">
+              <span>
+                <i className={running ? "online" : ""} />
+                {installing
+                  ? "正在安装"
                   : running
-                    ? setModal("stop")
-                    : launch()
-              }
-              aria-label={
-                installing ? "取消安装" : running ? "停止服务端" : "启动服务端"
-              }
-            >
-              {running ? (
-                <img src={design("0ad58.svg")} alt="Server Running" />
-              ) : (
-                <span>
-                  {installing
-                    ? "Cancel Installation"
-                    : busy
-                      ? "Please Wait"
-                      : "Launch Server"}
-                </span>
-              )}
-            </button>
-          </div>
-        </section>
+                    ? "进程运行中"
+                    : server
+                      ? "已停止"
+                      : "未选择实例"}
+              </span>
+              <label>
+                <input
+                  type="checkbox"
+                  checked={follow}
+                  onChange={(e) => setFollow(e.target.checked)}
+                />{" "}
+                自动滚动
+              </label>
+            </div>
+            <div className="bottom-actions">
+              <div className="management">
+                <img src={design("2de31.svg")} alt="" />
+                {(
+                  [
+                    "启动配置",
+                    "插件",
+                    "打开实例目录",
+                    "打开日志目录",
+                    "移入回收目录",
+                  ] as const
+                ).map((label, i) => (
+                  <button
+                    key={label}
+                    aria-label={label}
+                    title={label}
+                    disabled={!server || busy || (i === 4 && running)}
+                    onClick={() => {
+                      if (i === 0) void open("config");
+                      if (i === 1) void open("plugins");
+                      if (i === 2) folder("server");
+                      if (i === 3) folder("logs");
+                      if (i === 4) void open("archive");
+                    }}
+                  />
+                ))}
+              </div>
+              <button
+                className={`launch-button ${running ? "is-running" : ""}`}
+                disabled={(!server && !installing) || busy || loading}
+                onClick={() =>
+                  installing
+                    ? void perform(
+                        () => call("cancel_install", { name: selected }),
+                        "正在取消，请等待下载请求结束",
+                      )
+                    : running
+                      ? setModal("stop")
+                      : launch()
+                }
+                aria-label={
+                  installing
+                    ? "取消安装"
+                    : running
+                      ? "停止服务端"
+                      : "启动服务端"
+                }
+              >
+                {running ? (
+                  <img src={design("0ad58.svg")} alt="Server Running" />
+                ) : (
+                  <span>
+                    {installing
+                      ? "Cancel Installation"
+                      : busy
+                        ? "Please Wait"
+                        : "Launch Server"}
+                  </span>
+                )}
+              </button>
+            </div>
+          </section>
         </div>
       </div>
       {error && (

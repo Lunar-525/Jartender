@@ -31,10 +31,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": [
-      "app",
-      "dmg"
-    ],
+    "targets": ["app", "dmg"],
     "icon": [
       "icons-bartender-simple/icon.png",
       "icons-bartender-simple/icon.icns",

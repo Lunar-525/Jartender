@@ -23,7 +23,7 @@ macOS 产物位于 `src-tauri/target/release/bundle/macos/JarTender.app` 和 `sr
 ## 使用
 
 - 开发模式首次使用仓库的 `Servers/`；打包应用默认使用系统应用数据目录下的 `Servers/`。在左上角设置面板中填写已有服务器根目录的绝对路径可切换，并持久化到系统应用配置目录中的 `settings.json`。切换目录时不能有运行或安装中的任务。
-- 鼠标移到左下角当前实例卡片上会展开实例列表。在当前卡片或列表上滚动可浏览，滚动不会切换实例；左键点击列表卡片才会选择实例并刷新控制台。列表显示名称、版本、核心及运行/安装状态，定时刷新保留浏览位置；移开鼠标、点击其他区域或按 Escape 可收起。也支持方向键浏览。
+- 鼠标移到当前实例卡片上时，白色主体左侧的列表淡入。卡片沿参考图的外侧竖列排列，靠近当前槽位时向右弯入；上下边缘渐隐。滚轮每次推进一个离散档位，触控板小位移会累积，弹簧动画负责收稳吸附。Frame 的 current instance 槽位随列表实时预览候选实例，此时尚未提交选择。左键点击槽位或列表卡片、或按 Enter 后才确认并刷新控制台；若选中的卡片还未到达槽位，整个列表会沿曲线滑动到该实例，并在其吸附到 current 槽位后提交选择、淡出。淡出期间列表保持最终位置和排列，下次打开时再定位到已选实例。按 Escape 取消预览并恢复浏览前的已确认实例，不修改保存的选择。鼠标移开不会自动取消，点击其他区域仍可取消。也支持方向键浏览；列表对齐期间拦截重复确认。系统开启“减少动态效果”时使用即时位置更新。定时刷新保留当前浏览档位。每张卡片和白色主体中的当前实例框都在左下角显示对应服务端类型的角标：透明底、按类型固定角度倾斜、从左下角出血并被卡片裁切，未知类型回退到 JarTender 标记。
 - 「Manage Instances」自动发现已有 JAR 服务端和 Forge/NeoForge 参数文件，保留搜索和选择入口；加号可查询官方版本、指定构建并安装，下载日志显示在控制台中。安装不启动服务器、不代替用户接受 EULA；可请求取消，阻塞中的请求仍需等待库的超时或下一个进度事件。
 - 第一个管理按钮读取和保存实例的 `jartender.json`，可探测本地 Java、选择启动入口、设置 JVM/服务端参数。每行是一个独立参数，包含空格的参数不会再次拆分。
 - 「Launch Server」启动真实 Java 进程；首次启动要求在应用中阅读并确认 EULA。确认只作用于当前实例。运行时按钮显示「Server Running」，点击可正常停止或再次确认后强制终止。
@@ -52,6 +52,12 @@ cargo test --manifest-path src-tauri/Cargo.toml --locked
 
 `public/design/` 保存从 Figma 下载的原始资源，`design-assets.json` 记录资源及对应图层。运行时没有临时 Figma URL。位图背景按设计的 570×570 画布和图层偏移组合；管理按钮保留原始 521×100 SVG，包括阴影，交互热区对应五个 80×80 按钮。实例版本、名称、日志及运行状态来自本地后端。
 
+角标资源位于 `public/logos/`：位图统一为 128×128 透明 PNG，矢量保留 SVG；实例列表按约 96 px、当前实例框按约 104 px 渲染，并按设计稿旋转、降透明度后由卡片裁切。Fabric、Forge、NeoForge、Paper、Purpur、Folia、Velocity、Bukkit/Spigot、Geyser、Leaves、Mohist、Arclight 使用各服务端项目官网的官方标记，vanilla、bungeecord、banner、catserver 和 installing 为本应用绘制。完整来源清单与商标说明见 `public/logos/README.md`。
+
 随包包含设计所用的 [BoutiqueBitmap9x9 3D 开源字体](https://github.com/scott0107000/BoutiqueBitmap9x9)，许可见 `public/fonts/OFL.txt`。`app-icon-bartender-simple.png` 是应用图标源，打包图标位于 `src-tauri/icons-bartender-simple/`。生成说明见 `app-icon-bartender-simple.md`。
 
-文字按钮、英文说明及弹窗标题使用用户提供的 `Branch.otf`，随应用离线加载。像素标题和版本号继续使用 BoutiqueBitmap9x9 3D；控制台保留等宽字体。
+文字按钮、英文说明及弹窗标题使用 [Marcellus](https://fonts.google.com/specimen/Marcellus)（SIL OFL 1.1，许可见 `public/fonts/Marcellus-OFL.txt`），随应用离线加载；中文字形回退到 Songti SC / Noto Serif SC。像素标题和版本号继续使用 BoutiqueBitmap9x9 3D；控制台保留等宽字体。早期版本使用的商业字体 Branch 授权不允许随应用分发，已移除；完整字体清单见 `public/fonts/FONTS.md`。
+
+动画通过 Motion 的共享弹簧进度和非线性位置映射实现。透明窗口左侧留出额外空间，保留白色主体和控件的 85% 最大比例；打开列表时，原生鼠标命中区域覆盖左侧轨道，收起后恢复穿透。
+
+可运行 `npm run dev` 并打开 `/tests/instance-carousel.html`，使用独立测试数据检查淡入、吸附和列表对齐动画；该预览不包含在正式应用入口中。

@@ -27,3 +27,6 @@ reports/
 
 # Locally managed JDK installations
 /java/
+
+# Locally archived assets that must not be redistributed (e.g. commercially licensed fonts)
+/.local-fonts/

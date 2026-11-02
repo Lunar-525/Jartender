@@ -122,7 +122,7 @@ h1 {
   left: 121px;
   top: 132px;
   margin: 0;
-  font-family: "Branch", "Songti SC", serif;
+  font-family: "Marcellus", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
   font-size: 18px;
   line-height: 15px;
   color: #9b9898;
@@ -173,31 +173,110 @@ h1 {
   width: 330px;
   height: 100px;
 }
-.instance-popover { position: absolute; left: 0; top: 0; width: 330px; height: 100px; z-index: 8; pointer-events: none; }
-.instance-rail { position: absolute; left: -365px; top: -660px; width: 380px; height: 980px; pointer-events: none; }
-.instance-hover-bridge { width: 365px; height: 100%; }
-.instance-options { position: absolute; inset: 0; width: 330px; height: 100px; overflow: visible; pointer-events: none; }
-.instance-option, .instance-insertion { position: absolute; left: 0; top: 0; width: 330px; height: 100px; border: 0; padding: 17px 12px 22px; background: rgba(35,31,32,.68); color: #fff; box-shadow: var(--shadow); overflow: hidden; transform-origin: center; }
-.instance-option { cursor: pointer; }
-.instance-option.is-candidate { box-shadow: inset 2px 0 #b0c9c0, var(--shadow); }
-.instance-option:hover, .instance-option:focus-visible { background: rgba(35,31,32,.84); }
-.instance-option:focus-visible { outline-offset: -3px; }
-.instance-option .instance-version, .instance-insertion .instance-version { display: block; font-size: 48px; }
-.instance-insertion { z-index: 30; pointer-events: none; background: rgba(35,31,32,.76); }
-.selected-instance.is-replacing { opacity: 0; transform: translateX(14px) scale(.97); }
-.selected-instance { transition: opacity 160ms ease, transform 180ms ease; }
+.instance-popover {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 330px;
+  height: 100px;
+  z-index: 8;
+  pointer-events: none;
+}
+.instance-rail {
+  position: absolute;
+  left: -365px;
+  top: -660px;
+  width: 380px;
+  height: 980px;
+  pointer-events: none;
+}
+.instance-hover-bridge {
+  width: 365px;
+  height: 100%;
+}
+.instance-options {
+  position: absolute;
+  inset: 0;
+  width: 330px;
+  height: 100px;
+  overflow: visible;
+  pointer-events: none;
+}
+.instance-option {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 330px;
+  height: 100px;
+  border: 0;
+  padding: 17px 12px 22px;
+  background: rgba(35, 31, 32, 0.68);
+  color: #fff;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  transform-origin: center;
+  text-align: center;
+}
+.instance-option {
+  cursor: pointer;
+}
+.instance-option[aria-hidden="true"] {
+  visibility: hidden;
+}
+.instance-option.is-candidate {
+  box-shadow:
+    inset 2px 0 #b0c9c0,
+    var(--shadow);
+}
+.instance-option:hover,
+.instance-option:focus-visible {
+  background: rgba(35, 31, 32, 0.84);
+}
+.instance-option:focus-visible {
+  outline-offset: -3px;
+}
+.instance-option .instance-version {
+  display: block;
+  font-size: 48px;
+}
+/* Corner badge from the design collage: oversized, tilted, faded into the card
+   and clipped by its edges. It reaches the bottom-left corner, never the top. */
+.instance-logo {
+  --logo-size: 96px;
+  --logo-tilt: -10deg;
+  position: absolute;
+  width: var(--logo-size);
+  height: var(--logo-size);
+  object-fit: contain;
+  transform: rotate(var(--logo-tilt));
+  image-rendering: pixelated;
+  opacity: 0.68;
+  pointer-events: none;
+  user-select: none;
+}
+.instance-option .instance-logo {
+  left: -20px;
+  top: 26px;
+}
+.selected-instance {
+  transition:
+    opacity 160ms ease,
+    transform 180ms ease;
+}
 .instance-core {
   position: absolute;
   top: 5px;
   left: 12px;
   color: #ddd8d8;
   font:
-    16px/1 "Branch",
+    16px/1 "Marcellus",
+    "Songti SC",
+    "Noto Serif SC",
     serif;
 }
 .instance-option-detail {
   position: absolute;
-  left: 12px;
+  left: 84px;
   right: 12px;
   bottom: 7px;
   display: flex;
@@ -206,6 +285,7 @@ h1 {
   gap: 10px;
   font-size: 11px;
   color: #e6e1e1;
+  text-shadow: 0 1px 3px #000000b3;
 }
 .instance-option-detail > span:first-child {
   overflow: hidden;
@@ -256,8 +336,16 @@ h1 {
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  right: 12px;
+  display: block;
+  transform: translateY(-50%);
+  text-align: center;
 }
 .instance-name {
+  text-align: center;
   letter-spacing: 0.5px;
   color: #e5e1e1;
   max-width: 100%;
@@ -266,9 +354,15 @@ h1 {
   text-overflow: ellipsis;
   position: absolute;
   bottom: 8px;
-  left: 10px;
+  left: 94px;
   right: 10px;
   font-size: 11px;
+}
+/* The current-instance frame carries the same badge in its bottom-left corner. */
+.selected-instance .instance-logo {
+  --logo-size: 106px;
+  left: -26px;
+  top: 22px;
 }
 .picker-actions {
   display: flex;
@@ -369,7 +463,7 @@ h1 {
 }
 .console-empty p {
   margin: 0;
-  font-family: "Branch", "Songti SC", serif;
+  font-family: "Marcellus", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
   font-size: 32px;
 }
 .console-empty small {
@@ -537,7 +631,7 @@ input[type="checkbox"] {
   position: absolute;
   left: 895px;
   top: 807px;
-  font-family: "Branch", "Songti SC", serif;
+  font-family: "Marcellus", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
   font-size: 48px;
   font-weight: 400;
 }
@@ -558,7 +652,7 @@ input[type="checkbox"] {
   justify-content: center;
   align-items: center;
   background: #a35959e6;
-  font-family: "Branch", "Songti SC", serif;
+  font-family: "Marcellus", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
 }
 .workspace.expanded {
   inset: 80px 30px 30px;
@@ -647,7 +741,7 @@ dialog::backdrop {
     30px/1.25 "Times New Roman",
     "Songti SC",
     serif;
-  font-family: "Branch", "Songti SC", serif;
+  font-family: "Marcellus", "Songti SC", "Noto Serif SC", "Source Han Serif SC", serif;
 }
 .dialog-heading button {
   background: none;
@@ -827,8 +921,8 @@ code {
 /* Canvas coordinates are relative to the Figma white frame at (100,100).
    Scale the shared surface so protruding controls and their hit targets stay aligned. */
 @font-face {
-  font-family: "Branch";
-  src: url("/fonts/Branch.otf") format("opentype");
+  font-family: "Marcellus";
+  src: url("/fonts/Marcellus-Regular.ttf") format("truetype");
   font-display: swap;
 }
 html,
@@ -877,8 +971,20 @@ body,
   display: flex;
 }
 
-.design-artboard { position: absolute; left: 350px; top: 0; width: 1500px; height: 980px; }
+.design-artboard {
+  position: absolute;
+  left: 350px;
+  top: 0;
+  width: 1500px;
+  height: 980px;
+}
 @media (prefers-reduced-motion: reduce) {
-  .selected-instance { transition: none; }
-  .selected-instance.is-replacing { transform: none; }
+  .selected-instance {
+    transition: none;
+  }
+}
+
+/* While browsing, the preview card itself travels through the current-instance slot. */
+.selected-instance.is-previewing {
+  opacity: 0;
 }
