@@ -1,0 +1,46 @@
+{
+  "$schema": "https://schema.tauri.app/config/2",
+  "productName": "JarTender",
+  "version": "0.1.0",
+  "identifier": "io.jartender.desktop",
+  "build": {
+    "beforeDevCommand": "npm run dev",
+    "devUrl": "http://127.0.0.1:1420",
+    "beforeBuildCommand": "npm run build",
+    "frontendDist": "../dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "label": "main",
+        "title": "JarTender",
+        "width": 1573,
+        "height": 935,
+        "minWidth": 1100,
+        "minHeight": 660,
+        "decorations": false,
+        "transparent": true,
+        "shadow": false,
+        "acceptFirstMouse": true,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; img-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src ipc: http://ipc.localhost"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": [
+      "app",
+      "dmg"
+    ],
+    "icon": [
+      "icons-bartender-simple/icon.png",
+      "icons-bartender-simple/icon.icns",
+      "icons-bartender-simple/icon.ico"
+    ],
+    "category": "Utility",
+    "shortDescription": "Minecraft server manager"
+  }
+}

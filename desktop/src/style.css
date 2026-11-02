@@ -1,0 +1,884 @@
+@font-face {
+  font-family: "BoutiqueBitmap9x9_3D";
+  src: url("/fonts/BoutiqueBitmap9x9_3D.ttf") format("truetype");
+  font-display: swap;
+}
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  color: #393738;
+  font-synthesis: none;
+  --panel: rgba(35, 31, 32, 0.5);
+  --shadow: 10px 10px 5px #00000012;
+  background: transparent;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+}
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+button {
+  cursor: pointer;
+  transition:
+    filter 0.15s,
+    background 0.15s;
+}
+button:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid #389c9a;
+  outline-offset: 4px;
+}
+button:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.app {
+  position: relative;
+  grid-template-columns: 350px minmax(0, 1fr);
+  grid-template-rows: 80px minmax(0, 1fr);
+  column-gap: clamp(35px, 6vw, 114px);
+  display: block;
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  padding: 0;
+  background: transparent;
+  overflow: hidden;
+}
+.titlebar {
+  grid-column: 1/-1;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  z-index: 3;
+  position: absolute;
+  left: 70px;
+  top: 57px;
+  width: 1325px;
+  height: 66px;
+}
+.title-line {
+  position: absolute;
+  pointer-events: none;
+  left: 16px;
+  top: 28px;
+  width: 1219px;
+  height: 30px;
+}
+h1 {
+  margin: 0;
+  font-family: "BoutiqueBitmap9x9_3D", "Courier New", monospace;
+  font-size: 60px;
+  font-weight: 400;
+  line-height: 1.1;
+  color: #fff;
+  text-shadow: 2px 2px 0 #0008;
+  z-index: 1;
+}
+.window-controls {
+  margin-left: auto;
+  display: flex;
+  gap: 15px;
+  position: absolute;
+  right: 0;
+  top: 28px;
+}
+.window-controls button {
+  padding: 0;
+  border: 0;
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  display: block;
+}
+.window-controls img {
+  display: block;
+}
+.sidebar {
+  grid-row: 2;
+  z-index: 1;
+  flex-direction: column;
+  align-items: start;
+  position: static;
+  display: block;
+}
+.about {
+  font:
+    18px/15px "Times New Roman",
+    serif;
+  position: absolute;
+  left: 121px;
+  top: 132px;
+  margin: 0;
+  font-family: "Branch", "Songti SC", serif;
+  font-size: 18px;
+  line-height: 15px;
+  color: #9b9898;
+}
+.about p {
+  margin: 0;
+}
+.about p:last-child {
+  margin-top: 14px;
+}
+.asset-button {
+  position: relative;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+.asset-button img {
+  display: block;
+  pointer-events: none;
+  max-width: none;
+}
+.settings-button {
+  height: 60px;
+  width: 60px;
+  position: absolute;
+  left: 85px;
+  top: 226px;
+  margin: 0;
+}
+.settings-button img {
+  position: absolute;
+  left: -10px;
+  top: -10px;
+}
+.instance-picker {
+  margin-top: auto;
+  margin-left: -25px;
+  position: absolute;
+  left: 85px;
+  top: 737px;
+  width: 330px;
+  margin: 0;
+  padding: 0;
+  z-index: 6;
+}
+.instance-switcher {
+  position: relative;
+  width: 330px;
+  height: 100px;
+}
+.instance-popover { position: absolute; left: 0; top: 0; width: 330px; height: 100px; z-index: 8; pointer-events: none; }
+.instance-rail { position: absolute; left: -365px; top: -660px; width: 380px; height: 980px; pointer-events: none; }
+.instance-hover-bridge { width: 365px; height: 100%; }
+.instance-options { position: absolute; inset: 0; width: 330px; height: 100px; overflow: visible; pointer-events: none; }
+.instance-option, .instance-insertion { position: absolute; left: 0; top: 0; width: 330px; height: 100px; border: 0; padding: 17px 12px 22px; background: rgba(35,31,32,.68); color: #fff; box-shadow: var(--shadow); overflow: hidden; transform-origin: center; }
+.instance-option { cursor: pointer; }
+.instance-option.is-candidate { box-shadow: inset 2px 0 #b0c9c0, var(--shadow); }
+.instance-option:hover, .instance-option:focus-visible { background: rgba(35,31,32,.84); }
+.instance-option:focus-visible { outline-offset: -3px; }
+.instance-option .instance-version, .instance-insertion .instance-version { display: block; font-size: 48px; }
+.instance-insertion { z-index: 30; pointer-events: none; background: rgba(35,31,32,.76); }
+.selected-instance.is-replacing { opacity: 0; transform: translateX(14px) scale(.97); }
+.selected-instance { transition: opacity 160ms ease, transform 180ms ease; }
+.instance-core {
+  position: absolute;
+  top: 5px;
+  left: 12px;
+  color: #ddd8d8;
+  font:
+    16px/1 "Branch",
+    serif;
+}
+.instance-option-detail {
+  position: absolute;
+  left: 12px;
+  right: 12px;
+  bottom: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  font-size: 11px;
+  color: #e6e1e1;
+}
+.instance-option-detail > span:first-child {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.instance-state {
+  flex-shrink: 0;
+  font-size: 10px;
+  color: #c5bfbf;
+}
+.instance-state.running {
+  color: #9ddfbe;
+}
+.instance-state.installing {
+  color: #f5d49d;
+}
+.instance-count {
+  position: absolute;
+  top: 7px;
+  right: 10px;
+  font:
+    10px/1.2 -apple-system,
+    sans-serif;
+  color: #dad4d4;
+}
+.selected-instance {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 330px;
+  height: 100px;
+  padding: 10px;
+  background: var(--panel);
+  color: #fff;
+  border: 0;
+  box-shadow: var(--shadow);
+  overflow: hidden;
+  gap: 6px;
+  position: relative;
+}
+.instance-version {
+  font:
+    48px/1 "BoutiqueBitmap9x9_3D",
+    monospace;
+  max-width: 100%;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.instance-name {
+  letter-spacing: 0.5px;
+  color: #e5e1e1;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  position: absolute;
+  bottom: 8px;
+  left: 10px;
+  right: 10px;
+  font-size: 11px;
+}
+.picker-actions {
+  display: flex;
+  gap: 15px;
+  margin-top: 10px;
+}
+.manage-button {
+  width: 255px;
+  height: 60px;
+}
+.manage-button img,
+.add-button img {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.add-button {
+  width: 60px;
+  height: 60px;
+}
+.fabric-background {
+  pointer-events: none;
+  position: absolute;
+  width: 570px;
+  height: 570px;
+  opacity: 0.33;
+  overflow: hidden;
+  left: -107px;
+  top: 305px;
+  bottom: auto;
+}
+.fabric-background img {
+  position: absolute;
+  left: 0;
+  top: 0;
+  max-width: none;
+}
+.workspace {
+  grid-row: 2;
+  grid-column: 2;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  z-index: 2;
+  padding-top: 0;
+  position: static;
+  display: block;
+}
+.console-wrap {
+  flex: 1;
+  padding-bottom: 26px;
+  position: absolute;
+  left: 594px;
+  top: 140px;
+  width: 850px;
+  height: 525px;
+  min-height: 0;
+  padding: 0;
+}
+.console-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 850px;
+  height: 525px;
+}
+.console {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 26px;
+  padding: 8px 10px;
+  overflow: auto;
+  color: #f3f1f1;
+  font:
+    15px/1.25 "SFMono-Regular",
+    Consolas,
+    "Liberation Mono",
+    monospace;
+  overflow-wrap: anywhere;
+  white-space: pre-wrap;
+  scrollbar-color: #c5c2c2 transparent;
+  font-size: 18px;
+  line-height: 18px;
+}
+.console-empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  color: #f1eeee;
+  gap: 10px;
+  text-align: center;
+  padding: 24px;
+}
+.console-empty p {
+  margin: 0;
+  font-family: "Branch", "Songti SC", serif;
+  font-size: 32px;
+}
+.console-empty small {
+  color: #d7d3d3;
+  font:
+    12px/1.8 -apple-system,
+    sans-serif;
+}
+.console-prompt {
+  font-size: 38px;
+  color: #c7c4c4;
+  padding-bottom: 8px;
+}
+.log-error {
+  color: #ffd4d2;
+}
+.log-warn {
+  color: #f9e7b0;
+}
+.command-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  color: #ddd;
+  font: 16px/1 monospace;
+  padding-left: 8px;
+  height: 25.68px;
+}
+.command-bar > img {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  width: 850px;
+  height: 25.68px;
+}
+.command-bar > span,
+.command-bar > input,
+.command-bar > button {
+  position: relative;
+}
+.command-bar input {
+  border: 0;
+  outline: 0;
+  color: #fff;
+  background: transparent;
+  width: 100%;
+  min-width: 0;
+  padding: 3px 9px;
+  font: inherit;
+}
+.command-bar input::placeholder {
+  color: #ccc;
+}
+.command-bar button {
+  border: 0;
+  color: #fff;
+  background: #ffffff0c;
+  padding: 2px 12px;
+  margin-right: 60px;
+}
+.console-expand {
+  position: absolute;
+  bottom: -10px;
+  right: -10px;
+  height: 60px;
+  width: 60px;
+}
+.console-expand img {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+}
+.console-expand span {
+  position: relative;
+  font: 26px monospace;
+  color: #6f6b6c;
+}
+.console-status {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  color: #a09b9b;
+  font-size: 11px;
+  position: absolute;
+  left: 594px;
+  top: 675px;
+  width: 850px;
+  height: 32px;
+  padding-right: 65px;
+}
+.console-status > span {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+.console-status i {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #b2adad;
+}
+.console-status i.online {
+  background: #4a9c80;
+}
+.console-status label {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+input[type="checkbox"] {
+  accent-color: #45968c;
+}
+.bottom-actions {
+  align-self: flex-end;
+  flex-direction: column;
+  gap: 17px;
+  position: static;
+  display: block;
+  width: auto;
+}
+.management {
+  display: flex;
+  justify-content: space-between;
+  width: 501px;
+  height: 80px;
+  position: absolute;
+  left: 894px;
+  top: 710px;
+}
+.management > img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+.management > button {
+  width: 80px;
+  height: 80px;
+  border: 0;
+  background: transparent;
+  position: relative;
+}
+.management > button:hover:not(:disabled),
+.management > button:focus-visible {
+  background: #fff2;
+}
+.management > button:disabled {
+  background: #fff5;
+  opacity: 1;
+}
+.launch-button {
+  width: 500px;
+  height: 100px;
+  border: 0;
+  padding: 0;
+  background: linear-gradient(110deg, #4c9e7d, #4c9eb5);
+  color: white;
+  box-shadow: 10px 10px 8px #0003;
+  font:
+    48px/1 "Times New Roman",
+    serif;
+  position: absolute;
+  left: 895px;
+  top: 807px;
+  font-family: "Branch", "Songti SC", serif;
+  font-size: 48px;
+  font-weight: 400;
+}
+.launch-button.is-running {
+  background: transparent;
+  box-shadow: none;
+}
+.launch-button > img {
+  position: absolute;
+  left: 0;
+  top: 0;
+}
+.launch-button.is-running:hover::after {
+  content: "Stop Server";
+  position: absolute;
+  inset: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #a35959e6;
+  font-family: "Branch", "Songti SC", serif;
+}
+.workspace.expanded {
+  inset: 80px 30px 30px;
+  z-index: 4;
+  position: static;
+  background: transparent;
+  padding: 0;
+}
+.workspace.expanded .console-wrap {
+  flex: 1;
+  left: 130px;
+  top: 140px;
+  width: 1314px;
+  height: 525px;
+  z-index: 4;
+  background: #b7b6b6;
+}
+.workspace.expanded .bottom-actions {
+  flex-direction: row;
+  align-items: center;
+  gap: 28px;
+  display: block;
+  position: static;
+  width: auto;
+  height: auto;
+  margin: 0;
+}
+.workspace.expanded .launch-button {
+  width: 500px;
+}
+.toast {
+  position: fixed;
+  left: 50%;
+  transform: translateX(-50%);
+  bottom: 24px;
+  padding: 13px 18px;
+  max-width: min(700px, 90vw);
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  box-shadow: 0 4px 30px #0002;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+.toast.error {
+  background: #923f43;
+  color: #fff;
+}
+.toast.notice {
+  background: #e8f2ed;
+  color: #2d6858;
+}
+.toast button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font-size: 22px;
+}
+dialog {
+  width: min(620px, calc(100vw - 60px));
+  max-height: calc(100dvh - 80px);
+  padding: 0;
+  border: 1px solid #d1cece;
+  color: #454142;
+  background: #fff;
+  box-shadow: 15px 15px 50px #0003;
+}
+dialog::backdrop {
+  background: #231f2055;
+  backdrop-filter: blur(5px);
+}
+.dialog-content {
+  padding: 28px 32px 32px;
+}
+.dialog-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 20px;
+}
+.dialog-heading h2 {
+  margin: 0;
+  font:
+    30px/1.25 "Times New Roman",
+    "Songti SC",
+    serif;
+  font-family: "Branch", "Songti SC", serif;
+}
+.dialog-heading button {
+  background: none;
+  border: 0;
+  padding: 0 5px;
+  font-size: 28px;
+  color: #8e8787;
+}
+dialog form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+dialog label:not(.check) {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 13px;
+}
+dialog input:not([type="checkbox"]),
+dialog select,
+dialog textarea {
+  background: #f7f6f6;
+  border: 1px solid #dedbdb;
+  padding: 10px 12px;
+  border-radius: 0;
+  color: #3c3839;
+  width: 100%;
+  min-width: 0;
+}
+dialog textarea {
+  resize: vertical;
+  min-height: 80px;
+  font: 12px/1.7 monospace;
+}
+dialog button:not(.dialog-heading button) {
+  border: 1px solid #d2cece;
+  color: #5c5657;
+  background: #f2f0f0;
+  padding: 10px 16px;
+  font-size: 13px;
+}
+dialog button.primary {
+  color: #fff;
+  background: #4d948b;
+  border-color: #4d948b;
+}
+dialog button.danger {
+  color: #fff;
+  background: #a55d62;
+  border-color: #a55d62;
+}
+dialog p {
+  line-height: 1.8;
+  font-size: 14px;
+}
+dialog .hint {
+  font-size: 12px;
+  color: #9b9294;
+  margin: 5px 0;
+}
+dialog h3 {
+  margin: 8px 0 0;
+  font-weight: 500;
+  font-size: 16px;
+}
+dialog hr {
+  border: 0;
+  border-top: 1px solid #e4e1e1;
+  width: 100%;
+}
+dialog a {
+  color: #39897d;
+}
+.field-action {
+  display: flex;
+  gap: 8px;
+}
+.field-action > button {
+  flex: none;
+}
+.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  margin: 12px 0;
+}
+.list-toolbar {
+  display: flex;
+  gap: 8px;
+}
+.list-toolbar > input {
+  flex: 1;
+}
+.list-toolbar > button {
+  white-space: nowrap;
+}
+.instance-list {
+  margin-top: 16px;
+  max-height: 320px;
+  overflow: auto;
+}
+dialog .instance-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  text-align: left;
+  width: 100%;
+  border: 0 !important;
+  background: #f6f4f4 !important;
+  margin-bottom: 8px;
+  padding: 15px !important;
+}
+.instance-row > span {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.instance-row > span:last-child {
+  align-items: flex-end;
+}
+.instance-row small {
+  font-size: 11px;
+  color: #9a9193;
+}
+dialog .instance-row.active {
+  box-shadow: inset 3px 0 #4d948b;
+  background: #eef4f1 !important;
+}
+.empty-state {
+  text-align: center;
+  padding: 30px 0;
+  color: #a59a9d;
+}
+.path,
+code {
+  overflow-wrap: anywhere;
+}
+.runtime {
+  padding: 12px 0;
+  border-bottom: 1px solid #eee;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  font-size: 12px;
+}
+.runtime code {
+  color: #a59a9d;
+  font-size: 11px;
+}
+.plugin-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid #e8e5e5;
+  font-size: 12px;
+}
+.plugin-row small {
+  color: #a59a9d;
+  white-space: nowrap;
+}
+.dialog-actions {
+  display: flex;
+  gap: 12px;
+}
+.inline-error {
+  background: #fcf0ef;
+  padding: 10px 12px;
+  color: #97434a;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+/* Canvas coordinates are relative to the Figma white frame at (100,100).
+   Scale the shared surface so protruding controls and their hit targets stay aligned. */
+@font-face {
+  font-family: "Branch";
+  src: url("/fonts/Branch.otf") format("opentype");
+  font-display: swap;
+}
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  overflow: hidden;
+}
+.design-surface {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 1850px;
+  height: 1100px;
+  transform-origin: center;
+}
+.white-frame {
+  position: absolute;
+  left: 100px;
+  top: 100px;
+  width: 1280px;
+  height: 768px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 0 60px #231f2080;
+}
+.workspace.expanded .console-background {
+  width: 850px;
+  height: 525px;
+  opacity: 0;
+}
+.workspace.expanded .console-status {
+  left: 130px;
+  width: 1314px;
+  z-index: 4;
+}
+.workspace.expanded .command-bar {
+  background: #777;
+}
+.workspace.expanded .command-bar > img {
+  opacity: 0;
+}
+.workspace.expanded .management {
+  display: flex;
+}
+
+.design-artboard { position: absolute; left: 350px; top: 0; width: 1500px; height: 980px; }
+@media (prefers-reduced-motion: reduce) {
+  .selected-instance { transition: none; }
+  .selected-instance.is-replacing { transform: none; }
+}

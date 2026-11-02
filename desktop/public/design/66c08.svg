@@ -1,0 +1,10 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="1219" height="30" viewBox="0 0 1219 30" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="TITLEBAR" d="M1219 0H0V30H1219V0Z" fill="url(#paint0_linear_0_6)"/>
+<defs>
+<linearGradient id="paint0_linear_0_6" x1="0" y1="15" x2="1219" y2="15" gradientUnits="userSpaceOnUse">
+<stop stop-color="#231F20" stop-opacity="0.5"/>
+<stop offset="0.57" stop-color="#231F20" stop-opacity="0.45"/>
+<stop offset="0.75" stop-color="#231F20" stop-opacity="0.3"/>
+</linearGradient>
+</defs>
+</svg>

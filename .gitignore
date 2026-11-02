@@ -21,3 +21,9 @@ replace.txt
 .DS_Store
 
 /target/
+
+# Local validation evidence (logs contain machine-specific paths)
+reports/
+
+# Locally managed JDK installations
+/java/

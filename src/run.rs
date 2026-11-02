@@ -15,6 +15,8 @@ pub struct LaunchOptions {
     /// An absolute path, or a bare executable name to be searched on PATH at spawn time.
     pub java: PathBuf,
     pub jar: Option<PathBuf>,
+    /// Explicit argument file relative to the server directory; mutually exclusive with `jar`.
+    pub args_file: Option<PathBuf>,
     /// Optional absolute path to an old inventory, used only to disambiguate JARs.
     pub legacy_list: Option<PathBuf>,
     pub jvm_args: Vec<OsString>,
@@ -28,6 +30,7 @@ impl LaunchOptions {
             server: server.into(),
             java: java.into(),
             jar: None,
+            args_file: None,
             legacy_list: None,
             jvm_args: Vec::new(),
             gui: false,
@@ -42,15 +45,36 @@ pub struct LaunchPlan {
     pub directory: PathBuf,
     pub java: PathBuf,
     pub args: Vec<OsString>,
+    pub server_type: &'static str,
+    /// False for recognized Velocity/BungeeCord proxies; unknown JARs still require consent.
+    pub requires_eula: bool,
 }
 
 impl LaunchPlan {
     /// Build an unstarted command. The caller controls stdio, spawning, and lifetime.
-    /// Check EULA consent with [`check_eula`] before starting the command.
+    /// Check EULA consent with [`Self::check_eula`] before starting the command.
     pub fn to_command(&self) -> Command {
         let mut command = Command::new(&self.java);
         command.args(&self.args).current_dir(&self.directory);
         command
+    }
+
+    /// Check consent when required by this selected core. Recognized proxies need no file.
+    pub fn check_eula(&self) -> Result<()> {
+        if self.requires_eula {
+            check_eula(&self.directory)
+        } else {
+            Ok(())
+        }
+    }
+
+    /// Record user consent when required; recognized proxies are left untouched.
+    pub fn accept_eula(&self) -> Result<()> {
+        if self.requires_eula {
+            accept_eula(&self.directory)
+        } else {
+            Ok(())
+        }
     }
 }
 
@@ -89,16 +113,33 @@ pub fn prepare_launch(root: &Path, options: &LaunchOptions) -> Result<LaunchPlan
     let directory = path
         .canonicalize()
         .map_err(|e| Error::io("open server", &path, e))?;
-    let jar = server::select_jar(
+    let (target, server_type) = server::select_target(
         &directory,
         &options.server,
         options.jar.as_deref(),
+        options.args_file.as_deref(),
         options.legacy_list.as_deref(),
     )?;
-    let mut args = options.jvm_args.clone();
-    args.push("-jar".into());
-    args.push(jar.into_os_string());
-    if !options.gui {
+    let requires_eula = !matches!(server_type, "velocity" | "bungeecord");
+    let mut args = Vec::new();
+    if matches!(&target, server::Target::Arguments(_))
+        && directory.join("user_jvm_args.txt").is_file()
+    {
+        args.push("@user_jvm_args.txt".into());
+    }
+    args.extend(options.jvm_args.iter().cloned());
+    match target {
+        server::Target::Jar(jar) => {
+            args.push("-jar".into());
+            args.push(jar.into_os_string());
+        }
+        server::Target::Arguments(file) => {
+            let mut arg = OsString::from("@");
+            arg.push(file);
+            args.push(arg);
+        }
+    }
+    if !options.gui && requires_eula {
         args.push("nogui".into());
     }
     args.extend(options.server_args.iter().cloned());
@@ -106,11 +147,25 @@ pub fn prepare_launch(root: &Path, options: &LaunchOptions) -> Result<LaunchPlan
         directory,
         java,
         args,
+        server_type,
+        requires_eula,
     })
 }
 
 fn eula_property(line: &str) -> Option<(&str, &str)> {
     line.split_once('=').filter(|(key, _)| key.trim() == "eula")
+}
+
+fn accepted(text: &str) -> bool {
+    text.lines()
+        .filter_map(eula_property)
+        .next_back()
+        .is_some_and(|(_, value)| value.trim() == "true")
+}
+
+/// Read consent without changing files; missing `eula.txt` means not accepted.
+pub(crate) fn eula_accepted(directory: &Path) -> Result<bool> {
+    Ok(accepted(&read_eula(directory)?.1))
 }
 
 fn read_eula(directory: &Path) -> Result<(PathBuf, String)> {
@@ -125,14 +180,10 @@ fn read_eula(directory: &Path) -> Result<(PathBuf, String)> {
 }
 
 /// Check consent without modifying files. Missing consent is a structured error.
+/// For a prepared launch, use [`LaunchPlan::check_eula`] to apply proxy policy too.
 pub fn check_eula(directory: &Path) -> Result<()> {
     let (path, text) = read_eula(directory)?;
-    if text
-        .lines()
-        .filter_map(eula_property)
-        .next_back()
-        .is_some_and(|(_, value)| value.trim() == "true")
-    {
+    if accepted(&text) {
         Ok(())
     } else {
         Err(Error::EulaNotAccepted { path })
@@ -143,12 +194,7 @@ pub fn check_eula(directory: &Path) -> Result<()> {
 /// This is an explicit write operation, separate from launch planning and spawning.
 pub fn accept_eula(directory: &Path) -> Result<()> {
     let (path, text) = read_eula(directory)?;
-    if text
-        .lines()
-        .filter_map(eula_property)
-        .next_back()
-        .is_some_and(|(_, value)| value.trim() == "true")
-    {
+    if accepted(&text) {
         return Ok(());
     }
     let mut lines: Vec<_> = text

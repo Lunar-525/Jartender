@@ -1,5 +1,5 @@
 //! A host application chooses configuration and owns all process/console policy.
-use jartender::{LaunchOptions, check_eula, discover, prepare_launch};
+use jartender::{LaunchOptions, discover, prepare_launch};
 use std::path::PathBuf;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -17,7 +17,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             .map_err(|_| "server name must be UTF-8")?;
         let java = args.next().ok_or("supply a Java executable explicitly")?;
         let plan = prepare_launch(&root, &LaunchOptions::new(server, java))?;
-        check_eula(&plan.directory)?;
+        plan.check_eula()?;
         // The host can set piped stdio, retain a Child, or use its own process manager.
         let status = plan.to_command().status()?;
         println!("server exited: {status}");

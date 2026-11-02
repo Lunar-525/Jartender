@@ -14,19 +14,23 @@
 //! let options = LaunchOptions::new("survival", "java");
 //! let plan = prepare_launch(&root, &options)?;
 //! // After the host has handled EULA consent, it owns spawning and console policy.
-//! jartender::check_eula(&plan.directory)?;
+//! plan.check_eula()?;
 //! let child = plan.to_command().spawn()?;
 //! # let _ = (servers, child);
 //! # Ok(())
 //! # }
 //! ```
 
-mod config;
+pub mod config;
+mod details;
 mod error;
 pub mod install;
+pub mod java;
+pub mod network;
 mod run;
 mod server;
+pub mod versions;
 
 pub use error::{Error, Result};
 pub use run::{LaunchOptions, LaunchPlan, accept_eula, check_eula, prepare_launch};
-pub use server::{Server, list as discover};
+pub use server::{Discovery, EulaState, Server, Skipped, list as discover, scan};
